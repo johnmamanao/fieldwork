@@ -64,7 +64,7 @@
   --topbar-h: 64px;
   --hairline: 1px;
   --focus-w: 2px;
-  --content-max: 1360px;
+  --content-max: none;    /* app pages use the full width; forms (profile, settings) set their own narrower column */
 
   /* motion */
   --dur-1: 120ms;   /* press, hover tint */

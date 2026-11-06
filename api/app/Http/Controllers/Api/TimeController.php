@@ -99,8 +99,12 @@ class TimeController extends Controller
             'task_id' => 'nullable|integer',
             'notes' => 'nullable|string|max:2000',
             'billable' => 'sometimes|boolean',
+            // the person's own calendar day, from their device; it may differ from the workspace's by one day
+            'work_date' => 'nullable|date_format:Y-m-d',
         ]);
         $project = $this->assertLoggable($data['project_id']);
+        $workDate = $this->ownDay($data['work_date'] ?? null);
+        unset($data['work_date']);
         if ($this->runningTimer()) {
             throw ValidationException::withMessages(['timer' => 'A timer is already running. Stop it first.']);
         }
@@ -109,7 +113,7 @@ class TimeController extends Controller
             $entry = TimeEntry::create($data + [
                 'user_id' => $this->ctx()->user->id,
                 'staff_profile_id' => $this->staffId(),
-                'work_date' => CarbonImmutable::now($this->tz())->toDateString(),
+                'work_date' => $workDate,
                 'minutes' => 0,
                 'status' => 'draft',
                 'billable' => $data['billable'] ?? $project->billing_model !== 'non_billable',
@@ -128,11 +132,18 @@ class TimeController extends Controller
         if (! $entry) {
             throw ValidationException::withMessages(['timer' => 'No timer is running.']);
         }
-        $elapsed = max(1, (int) ceil($entry->timer_started_at->diffInSeconds(now()) / 60));
-        $minutes = min($entry->minutes + $elapsed, self::MAX_DAY_MINUTES);
+        // Timesheets are kept in whole minutes: the run is rounded to the nearest minute, as the clock
+        // reads it. A run that rounds to nothing (under 30 seconds) on an otherwise empty entry is discarded.
+        $seconds = (int) $entry->timer_started_at->diffInSeconds(now());
+        $minutes = min($entry->minutes + (int) round($seconds / 60), self::MAX_DAY_MINUTES);
+        if ($minutes < 1) {
+            $entry->delete();
+
+            return ['entry' => null, 'discarded' => true, 'seconds' => $seconds, 'timer' => null];
+        }
         $entry->update(['minutes' => $minutes, 'timer_started_at' => null]);
 
-        return ['entry' => $entry->load('project:id,name,code,color'), 'timer' => null];
+        return ['entry' => $entry->load('project:id,name,code,color'), 'seconds' => $seconds, 'timer' => null];
     }
 
     // ------------------------------------------------------------- submission
@@ -306,6 +317,25 @@ class TimeController extends Controller
         $start = $d->startOfDay()->subDays(($d->dayOfWeekIso - $weekStart + 7) % 7);
 
         return [$start, $start->addWeek()];
+    }
+
+    /**
+     * The day a person's time belongs to: their own calendar day when their device sends it,
+     * as long as it is within one day of the workspace's (time zones never differ by more);
+     * otherwise the workspace's today.
+     */
+    private function ownDay(?string $date): string
+    {
+        $today = CarbonImmutable::now($this->tz())->startOfDay();
+        if (! $date) {
+            return $today->toDateString();
+        }
+        $d = CarbonImmutable::parse($date, $this->tz())->startOfDay();
+        if (abs($d->diffInDays($today, false)) > 1) {
+            throw ValidationException::withMessages(['work_date' => 'The timer can only start on today’s date.']);
+        }
+
+        return $d->toDateString();
     }
 
     private function staffId(): ?int

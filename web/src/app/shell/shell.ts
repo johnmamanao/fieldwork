@@ -1,8 +1,9 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
+import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Api } from '../core/api';
+import { Api, apiError } from '../core/api';
 import { Session } from '../core/session';
 import { Toasts } from '../core/toast';
 import { TimerState } from '../core/timer';
@@ -25,8 +26,8 @@ const ROLE_LABEL: Record<string, string> = { owner: 'Owner', admin: 'Administrat
 @Component({
   selector: 'fw-shell',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, Icon, Avatar, CountPop],
-  host: { '[class.rail]': 'rail()', '(window:resize)': 'onResize($event)', '(document:keydown)': 'onKey($event)' },
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, FormsModule, Icon, Avatar, CountPop],
+  host: { '[class.rail]': 'rail()', '(window:resize)': 'onResize($event)', '(document:keydown)': 'onKey($event)', '(document:pointerdown)': 'outsideQuick($event)' },
   styles: [`
     /* Three layouts, driven by width (drag the window to see them change):
        ≥1200px full sidebar · 768–1199px icon rail · <768px top bar + bottom tab bar. */
@@ -61,6 +62,16 @@ const ROLE_LABEL: Record<string, string> = { owner: 'Owner', admin: 'Administrat
     .m-brand, .m-quick, .tabbar { display: none; }
     .timer { display: inline-flex; align-items: center; gap: var(--space-2); height: var(--control-md); padding: 0 var(--space-1) 0 var(--space-3); border-radius: var(--radius-md); background: var(--color-bg-surface); box-shadow: var(--shadow-raised); font-size: var(--text-small); }
     .timer .dot { width: 8px; height: 8px; border-radius: var(--radius-full); background: var(--color-accent); }
+    /* quick start: a small panel under the top-bar button, so a timer starts from any page */
+    .quick { position: relative; }
+    .qs { position: absolute; right: 0; top: calc(100% + var(--space-2)); z-index: 60; width: min(340px, calc(100vw - var(--space-6))); display: grid; gap: var(--space-3); padding: var(--space-4); background: var(--color-bg-surface); border-radius: var(--radius-md); box-shadow: var(--shadow-overlay); animation: qs-in var(--dur-2) var(--ease-out) both; transform-origin: top right; }
+    .qs h2 { font-size: var(--text-body); font-weight: var(--weight-semibold); }
+    .qs .qs-foot { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+    .qs .qs-foot a { font-size: var(--text-small); color: var(--color-text-secondary); }
+    .qs .empty-note { font-size: var(--text-small); color: var(--color-text-secondary); }
+    @keyframes qs-in { from { opacity: 0; transform: translateY(-4px) scale(0.98); } to { opacity: 1; transform: none; } }
+    @media (max-width: 767px) { .qs { position: fixed; left: var(--space-4); right: var(--space-4); top: 64px; width: auto; transform-origin: top center; } }
+    @media (prefers-reduced-motion: reduce) { .qs { animation: none; } }
     .bell { position: relative; }
     .bell .badge-count { position: absolute; top: -4px; right: -4px; }
     .verify { margin: 0 var(--space-6) var(--space-4); }
@@ -190,7 +201,26 @@ const ROLE_LABEL: Record<string, string> = { owner: 'Owner', admin: 'Administrat
               <button class="btn btn-sm btn-primary" type="button" (click)="stopTimer()" aria-label="Stop timer"><fw-icon name="stop" /><span class="timer-label">Stop</span></button>
             </div>
           } @else {
-            <a class="btn" routerLink="/time" aria-label="Start timer"><fw-icon name="play" /><span class="timer-label">Start timer</span></a>
+            <div class="quick">
+              <button class="btn" type="button" aria-label="Start timer" aria-haspopup="dialog" [attr.aria-expanded]="quickOpen()" aria-controls="quick-start" (click)="toggleQuick()"><fw-icon name="play" /><span class="timer-label">Start timer</span></button>
+              @if (quickOpen()) {
+                <form id="quick-start" class="qs" role="dialog" aria-label="Start a timer" (ngSubmit)="quickStart()" (keydown.escape)="quickOpen.set(false)">
+                  <h2>Start a timer</h2>
+                  @if (timer.projects().length) {
+                    <div class="field"><label for="qs-p">Project</label>
+                      <select id="qs-p" class="select" name="p" [(ngModel)]="qsProject" required>
+                        <option [ngValue]="null" disabled>Choose a project</option>
+                        @for (p of timer.projects(); track p.id) { <option [ngValue]="p.id">{{ p.code }} · {{ p.name }}</option> }
+                      </select></div>
+                    <div class="field"><label for="qs-n">What are you working on?</label><input id="qs-n" class="input" name="n" [(ngModel)]="qsNotes" autocomplete="off" /></div>
+                    <div class="qs-foot"><a routerLink="/time" (click)="quickOpen.set(false)">Open timesheet</a>
+                      <button class="btn btn-primary" type="submit" [disabled]="!qsProject || qsBusy()"><fw-icon name="play" />Start</button></div>
+                  } @else {
+                    <p class="empty-note">No projects to log time to yet. A manager adds you to a project first.</p>
+                  }
+                </form>
+              }
+            </div>
           }
         }
         <a class="btn btn-icon btn-round bell" routerLink="/notifications" [attr.aria-label]="'Notifications, ' + unread() + ' unread'">
@@ -242,6 +272,36 @@ export class Shell {
 
   session = inject(Session);
   timer = inject(TimerState);
+  quickOpen = signal(false);
+  qsBusy = signal(false);
+  qsProject: number | null = null;
+  qsNotes = '';
+
+  /** Open the quick start, with the projects loaded and the last one used picked. */
+  async toggleQuick(): Promise<void> {
+    if (this.quickOpen()) { this.quickOpen.set(false); return; }
+    this.quickOpen.set(true);
+    if (!this.timer.projects().length) await this.timer.loadProjects();
+    let last: number | null = null;
+    try { last = Number(localStorage.getItem('fieldwork.lastProject')) || null; } catch { /* storage blocked */ }
+    if (this.qsProject === null) this.qsProject = this.timer.projects().some((p) => p.id === last) ? last : null;
+    requestAnimationFrame(() => (document.getElementById(this.qsProject ? 'qs-n' : 'qs-p') as HTMLElement | null)?.focus());
+  }
+  async quickStart(): Promise<void> {
+    if (!this.qsProject) return;
+    this.qsBusy.set(true);
+    try {
+      await this.timer.start({ project_id: this.qsProject, notes: this.qsNotes });
+      try { localStorage.setItem('fieldwork.lastProject', String(this.qsProject)); } catch { /* storage blocked */ }
+      this.qsNotes = '';
+      this.quickOpen.set(false);
+      this.toasts.ok(`Timer started on ${this.timer.running()?.project?.name ?? 'the project'}`);
+    } catch (e) { this.toasts.error(apiError(e).message); } finally { this.qsBusy.set(false); }
+  }
+  /** A click outside the quick start closes it. */
+  outsideQuick(e: Event): void {
+    if (this.quickOpen() && !(e.target as HTMLElement).closest('.quick')) this.quickOpen.set(false);
+  }
   private api = inject(Api);
   private router = inject(Router);
   private toasts = inject(Toasts);
@@ -353,7 +413,7 @@ export class Shell {
   async stopTimer(): Promise<void> {
     try {
       const res = await this.timer.stop();
-      this.toasts.ok(`Logged ${formatDuration(res.entry.minutes)} to ${res.entry.project?.name}`);
+      this.toasts.ok(this.timer.stopMessage(res));
     } catch { this.toasts.error('Could not stop the timer.'); }
   }
 

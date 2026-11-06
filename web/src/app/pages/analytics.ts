@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, OnInit, computed, inject, signal, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Api, apiError } from '../core/api';
@@ -11,6 +11,7 @@ import { FILL, Skyline } from '../shared/skyline';
 @Component({
   selector: 'fw-analytics',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { '(window:resize)': 'onResize()' },
   imports: [FormsModule, RouterLink, CompareChart, Sparkline, Skyline, ...FORMAT_PIPES, ...UI],
   styles: [`
     /* billable hours by day: the card */
@@ -19,7 +20,7 @@ import { FILL, Skyline } from '../shared/skyline';
     .daily-stats span, .sky-stats span { display: block; font-size: var(--text-small); color: var(--color-text-secondary); }
     .daily-stats b { font-size: var(--text-heading); font-weight: var(--weight-semibold); font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
     .daily-stats em, .sky-stats em { font-style: normal; font-weight: var(--weight-medium); font-size: var(--text-small); color: var(--color-text-tertiary); margin-left: var(--space-1); }
-    .card-grid { max-width: 760px; }
+    .card-grid { display: block; }
     .legend { display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); margin-top: var(--space-3); flex-wrap: wrap; }
     .scale { display: inline-flex; align-items: center; gap: var(--space-1); }
     .scale i { width: 10px; height: 10px; border-radius: 1px; display: inline-block; }
@@ -182,7 +183,7 @@ import { FILL, Skyline } from '../shared/skyline';
         </section>
 
         @if (daily(); as dd) {
-          <section class="panel panel-pad daily" style="margin-bottom: var(--space-4)">
+          <section class="panel panel-pad daily" #dailyCard style="margin-bottom: var(--space-4)">
             <div class="daily-head">
               <div><h2>Billable hours by day</h2><p class="small muted">Approved time, last {{ dd.weeks }} weeks · {{ dd.start | day }} – {{ endInclusive(dd.end_exclusive) | day }}</p></div>
               <div class="daily-stats">
@@ -196,11 +197,11 @@ import { FILL, Skyline } from '../shared/skyline';
             <div class="legend small faint"><span>Hover a day for its projects</span><span class="scale">Less @for (c of scale; track c) { <i [style.background]="c"></i> } More</span></div>
           </section>
 
-          @if (skyOpen()) {
+          @if (skyOpen() ? sky() : null; as sk) {
             <dialog fwModal #sd class="modal side" aria-label="Billable hours by day" (cancel)="$event.preventDefault(); skyOpen.set(false)" (click)="$event.target === sd && skyOpen.set(false)">
               <aside class="sky">
                 <header class="sky-head">
-                  <div class="grow"><h2>Billable hours by day</h2><p class="small muted">{{ session.workspace()?.name }} · {{ dd.start | day }} – {{ endInclusive(dd.end_exclusive) | day }}</p></div>
+                  <div class="grow"><h2>Billable hours by day</h2><p class="small muted">{{ session.workspace()?.name }} · {{ sk.start | day }} – {{ endInclusive(sk.end_exclusive) | day }}</p></div>
                   <button type="button" class="btn btn-ghost btn-icon" aria-label="Close" (click)="skyOpen.set(false)"><fw-icon name="x" /></button>
                 </header>
                 <div class="sky-body">
@@ -209,34 +210,34 @@ import { FILL, Skyline } from '../shared/skyline';
                       <button type="button" [attr.aria-pressed]="skyMode() === '3d'" (click)="skyMode.set('3d')">3D</button>
                       <button type="button" [attr.aria-pressed]="skyMode() === 'grid'" (click)="skyMode.set('grid')">Grid</button>
                     </div>
-                    <span class="small faint">Last {{ dd.weeks }} weeks · approved, billable</span>
+                    <span class="small faint">Last {{ sk.weeks }} weeks · approved, billable</span>
                   </div>
                   <div class="sky-stats">
-                    <div><span>{{ dd.weeks }}-week total</span><b class="accent">{{ dd.stats.total_minutes | hours: 0 }}<em>h</em></b></div>
-                    @if (dd.stats.busiest; as b) { <div><span>Busiest day</span><b>{{ b.minutes | hours: 0 }}<em>h · {{ b.date | day }}</em></b></div> }
-                    <div><span>Longest streak</span><b>{{ dd.stats.longest_streak }}<em>workdays</em></b></div>
-                    <div><span>Avg per workday</span><b>{{ avgWorkday(dd) | hours: 1 }}<em>h</em></b></div>
+                    <div><span>{{ sk.weeks }}-week total</span><b class="accent">{{ sk.stats.total_minutes | hours: 0 }}<em>h</em></b></div>
+                    @if (sk.stats.busiest; as b) { <div><span>Busiest day</span><b>{{ b.minutes | hours: 0 }}<em>h · {{ b.date | day }}</em></b></div> }
+                    <div><span>Longest streak</span><b>{{ sk.stats.longest_streak }}<em>workdays</em></b></div>
+                    <div><span>Avg per workday</span><b>{{ avgWorkday(sk) | hours: 1 }}<em>h</em></b></div>
                   </div>
                   <div class="sky-stage">
-                    <fw-skyline [days]="dd.days" [mode]="skyMode()" [busiest]="dd.stats.busiest?.date ?? null" />
+                    <fw-skyline [days]="sk.days" [mode]="skyMode()" [busiest]="sk.stats.busiest?.date ?? null" />
                     <div class="legend small faint"><span>Hover or use the arrow keys</span><span class="scale">Less @for (c of scale; track c) { <i [style.background]="c"></i> } More</span></div>
                   </div>
                   <div class="sky-pair">
                     <section class="sky-card">
                       <div class="spread"><h3>Weekday rhythm</h3><span class="small faint">avg h / day</span></div>
                       <div class="rhythm">
-                        @for (m of dd.stats.weekday_avg_minutes; track $index; let i = $index) {
-                          <div class="rb"><span class="v">{{ m | hours: 1 }}</span><div class="bar" [class.top]="m === maxOf(dd.stats.weekday_avg_minutes)" [style.height.%]="pct(m, maxOf(dd.stats.weekday_avg_minutes))"></div><span class="d">{{ 'MTWTFSS'[i] }}</span></div>
+                        @for (m of sk.stats.weekday_avg_minutes; track $index; let i = $index) {
+                          <div class="rb"><span class="v">{{ m | hours: 1 }}</span><div class="bar" [class.top]="m === maxOf(sk.stats.weekday_avg_minutes)" [style.height.%]="pct(m, maxOf(sk.stats.weekday_avg_minutes))"></div><span class="d">{{ 'MTWTFSS'[i] }}</span></div>
                         }
                       </div>
-                      <p class="small muted">{{ rhythmNote(dd.stats.weekday_avg_minutes) }}</p>
+                      <p class="small muted">{{ rhythmNote(sk.stats.weekday_avg_minutes) }}</p>
                     </section>
                     <section class="sky-card">
-                      <div class="spread"><h3>Where the hours went</h3><span class="small faint">{{ dd.weeks }} weeks</span></div>
+                      <div class="spread"><h3>Where the hours went</h3><span class="small faint">{{ sk.weeks }} weeks</span></div>
                       <ul class="split">
-                        @for (p of projectTotals(dd).slice(0, 5); track p.id) {
+                        @for (p of projectTotals(sk).slice(0, 5); track p.id) {
                           <li><i [style.background]="p.color || '#a1a1aa'"></i><span class="n">{{ p.name }}</span><b>{{ p.minutes | hours: 0 }}h</b>
-                            <div class="meter"><span [style.width.%]="pct(p.minutes, projectTotals(dd)[0].minutes)" [style.background]="p.color || null"></span></div></li>
+                            <div class="meter"><span [style.width.%]="pct(p.minutes, projectTotals(sk)[0].minutes)" [style.background]="p.color || null"></span></div></li>
                         }
                       </ul>
                     </section>
@@ -361,13 +362,42 @@ export class AnalyticsPage implements OnInit {
   skyMode = signal<'3d' | 'grid'>('3d');
   readonly scale = FILL;
 
-  /** Same filters as the page, but always the last 26 whole weeks (the grid's own window). */
+  /** The side panel's data: always 26 weeks, so the 3D bars stay wide enough to read. */
+  sky = signal<any>(null);
+  /** How many weeks the card shows: as many as fit at a comfortable cell size, from a quarter to a year. */
+  private cardWeeks = 26;
+  private dailyCard = viewChild<ElementRef<HTMLElement>>('dailyCard');
+  private fitWeeks(): number {
+    const w = this.dailyCard()?.nativeElement.clientWidth ?? (document.querySelector('.page') as HTMLElement | null)?.clientWidth ?? innerWidth;
+    return Math.max(13, Math.min(53, Math.floor((w - 48 - 38) / 26)));
+  }
+  private resizeTimer: ReturnType<typeof setTimeout> | undefined;
+  /** A wider or narrower window changes how many weeks fit; reload once the resize settles. */
+  onResize(): void {
+    clearTimeout(this.resizeTimer);
+    this.resizeTimer = setTimeout(() => { if (this.fitWeeks() !== this.cardWeeks) this.loadDaily(); }, 250);
+  }
+
+  /** Same filters as the page, for as many whole weeks as fit the card. */
   private async loadDaily(): Promise<void> {
     const { project_id, client_id, user_id, manager_id, status } = this.f;
-    try { this.daily.set(await this.api.get('/analytics/daily', { weeks: 26, project_id, client_id, user_id, manager_id, status })); }
+    this.cardWeeks = this.fitWeeks();
+    this.sky.set(null);
+    try { this.daily.set(await this.api.get('/analytics/daily', { weeks: this.cardWeeks, project_id, client_id, user_id, manager_id, status })); }
     catch { this.daily.set(null); }
   }
-  openSky(mode: '3d' | 'grid'): void { this.skyMode.set(mode); this.skyOpen.set(true); }
+  async openSky(mode: '3d' | 'grid'): Promise<void> {
+    this.skyMode.set(mode);
+    if (!this.sky()) {
+      const dd = this.daily();
+      if (dd?.weeks === 26) this.sky.set(dd);
+      else {
+        const { project_id, client_id, user_id, manager_id, status } = this.f;
+        try { this.sky.set(await this.api.get('/analytics/daily', { weeks: 26, project_id, client_id, user_id, manager_id, status })); } catch { return; }
+      }
+    }
+    this.skyOpen.set(true);
+  }
   avgWorkday(dd: any): number { return dd.stats.days_worked ? dd.stats.total_minutes / dd.stats.days_worked : 0; }
   maxOf(a: number[]): number { return Math.max(1, ...a); }
   pct(v: number, max: number): number { return max ? Math.max(2, (v / max) * 100) : 0; }

@@ -102,7 +102,13 @@ export class Skyline {
     const q = (f: number) => v[Math.min(v.length - 1, Math.floor(f * v.length))] ?? 0;
     return [q(0.25), q(0.5), q(0.75)];
   });
-  level = (m: number) => { if (m <= 0) return 0; const [a, b, c] = this.cuts(); return m <= a ? 1 : m <= b ? 2 : m <= c ? 3 : 4; };
+  /** True when every day with time has the same hours: quartiles say nothing then. */
+  private uniform = computed(() => { const v = this.days().map((d) => d.minutes).filter((m) => m > 0); return v.length > 0 && Math.min(...v) === Math.max(...v); });
+  level = (m: number) => {
+    if (m <= 0) return 0;
+    if (this.uniform()) return 3;   // a steady studio: every worked day is a full step, not the faintest
+    const [a, b, c] = this.cuts(); return m <= a ? 1 : m <= b ? 2 : m <= c ? 3 : 4;
+  };
   tipDay = computed(() => (this.hover() >= 0 ? this.days()[this.hover()] : null));
   tipPos = signal({ x: 0, y: 0 });
   label = computed(() => `Approved billable hours per day for ${this.weeks()} weeks. Use the arrow keys to read each day.`);

@@ -1,10 +1,10 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, effect, inject, signal, untracked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Api, apiError } from '../core/api';
 import { Session } from '../core/session';
 import { Toasts } from '../core/toast';
-import { TimerState } from '../core/timer';
+import { TimerState, localDay } from '../core/timer';
 import { FORMAT_PIPES, formatDuration, parseDuration } from '../core/format';
 import { UI } from '../shared/ui';
 import { QuickAction } from '../core/quick';
@@ -27,6 +27,10 @@ function addDays(iso: string, n: number): string {
     .grid-week td.cell button { border: 0; background: none; padding: var(--space-1) var(--space-2); border-radius: var(--radius-sm); cursor: pointer; font: inherit; color: inherit; min-width: 48px; text-align: right; }
     .grid-week td.cell button:hover { background: var(--color-bg-hover); }
     .grid-week td.today, .grid-week th.today { background: var(--color-accent-subtle); }
+    .live-dot { display: inline-block; width: 6px; height: 6px; margin-right: 6px; vertical-align: middle; background: var(--color-accent); animation: live-blink 1.2s steps(2, jump-none) infinite; }
+    .cell button.live { color: var(--color-accent-strong); font-weight: var(--weight-semibold); }
+    @keyframes live-blink { 50% { opacity: 0.25; } }
+    @media (prefers-reduced-motion: reduce) { .live-dot { animation: none; } }
     .timer-card { display: flex; gap: var(--space-3); align-items: flex-end; flex-wrap: wrap; }
     .state-dot { width: 8px; height: 8px; border-radius: var(--radius-full); display: inline-block; }
     .group-row td { background: var(--color-bg-sunken); font-weight: var(--weight-medium); }
@@ -57,7 +61,7 @@ function addDays(iso: string, n: number): string {
         <section class="panel panel-pad" style="margin-bottom: var(--space-4)">
           @if (timer.running(); as t) {
             <div class="spread wrap">
-              <div><div class="small muted">Timer running</div><div class="kpi-figure">{{ timer.elapsedText() }}</div><div class="small">{{ t.project?.name }}{{ t.notes ? ' · ' + t.notes : '' }}</div></div>
+              <div><div class="small muted">Timer running · logs to the nearest minute</div><div class="kpi-figure tabular">{{ timer.elapsedText() }}</div><div class="small">{{ t.project?.name }}{{ t.notes ? ' · ' + t.notes : '' }}</div></div>
               <button class="btn btn-primary" (click)="stopTimer()"><fw-icon name="stop" />Stop and log</button>
             </div>
           } @else {
@@ -95,7 +99,7 @@ function addDays(iso: string, n: number): string {
                 <tr>
                   <td><span class="row"><span class="swatch" [style.background]="r.project.color || 'var(--color-compare)'"></span>{{ r.project.name }}</span></td>
                   @for (d of days(); track d) {
-                    <td class="cell" [class.today]="d === today"><button type="button" (click)="openNew(r.project.id, d)" [attr.aria-label]="'Log time on ' + r.project.name + ' for ' + d">{{ r.byDay[d] ? fmt(r.byDay[d]) : '·' }}</button></td>
+                    <td class="cell" [class.today]="d === today"><button type="button" [class.live]="r.live === d" (click)="openNew(r.project.id, d)" [attr.aria-label]="'Log time on ' + r.project.name + ' for ' + d">@if (r.live === d) { <i class="live-dot" aria-hidden="true"></i> }{{ r.byDay[d] ? fmt(r.byDay[d]) : (r.live === d ? '0:00' : '·') }}</button></td>
                   }
                   <td class="num"><b>{{ fmt(r.total) }}</b></td>
                 </tr>
@@ -127,7 +131,7 @@ function addDays(iso: string, n: number): string {
                   <td>{{ e.project?.name }}@if (e.task) { <span class="cell-sub" style="display:block">{{ e.task.title }}</span> }</td>
                   <td class="muted">{{ e.notes }}@if (e.rejected_reason && e.status === 'rejected') { <span class="small" style="display:block; color: var(--color-danger)">Returned: {{ e.rejected_reason }}</span> }</td>
                   <td class="hide-md">{{ e.billable ? 'Billable' : 'Nonbillable' }}</td>
-                  <td class="num">@if (e.timer_started_at) { <span class="badge info">Running</span> } @else { {{ fmt(e.minutes) }} }</td>
+                  <td class="num">@if (e.timer_started_at) { <span class="badge info"><i class="live-dot" aria-hidden="true"></i>{{ timer.elapsedText() }}</span> } @else { {{ fmt(e.minutes) }} }</td>
                   <td><fw-status [value]="e.status" />@if (e.invoice_id) { <span class="badge" style="margin-left: var(--space-1)"><fw-icon name="lock" />Invoiced</span> }</td>
                   <td class="num">
                     @if ((e.status === 'draft' || e.status === 'rejected') && !e.timer_started_at && !e.invoice_id) {
@@ -145,7 +149,7 @@ function addDays(iso: string, n: number): string {
               <span class="m-main"><span class="m-title">{{ e.project?.name }}</span>
                 <span class="m-sub">{{ e.work_date | day: 'day' }}{{ e.notes ? ' · ' + e.notes : '' }}{{ e.billable ? '' : ' · Nonbillable' }}</span>
                 @if (e.rejected_reason && e.status === 'rejected') { <span class="m-sub" style="color: var(--color-danger)">Returned: {{ e.rejected_reason }}</span> }</span>
-              <span class="m-end"><span class="m-amount">@if (e.timer_started_at) { Running } @else { {{ fmt(e.minutes) }} }</span><fw-status [value]="e.status" /></span>
+              <span class="m-end"><span class="m-amount">@if (e.timer_started_at) { {{ timer.elapsedText() }} } @else { {{ fmt(e.minutes) }} }</span><fw-status [value]="e.status" /></span>
             </li>
           } @empty { <li class="m-row" style="cursor: default"><span class="m-main"><span class="m-title">Nothing logged this week</span><span class="m-sub">Tap a day above or use + to add an entry.</span></span></li> }</ul>
         </div>
@@ -251,7 +255,8 @@ export class TimePage implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
 
-  today = new Date().toLocaleDateString('en-CA', { timeZone: this.session.timezone() });
+  /** Today on this person's own calendar, so the timesheet's today matches their clock. */
+  today = localDay();
   tab = signal<'mine' | 'approvals' | 'uninvoiced'>('mine');
   weekStart = signal('');
   weekEnd = signal('');
@@ -287,28 +292,44 @@ export class TimePage implements OnInit {
     if (c['approved']) parts.push(`${c['approved']} approved`);
     return parts.join(' · ') || 'No entries';
   });
+  /** An entry's minutes, with the running timer counted live (rounded as it will be logged). */
+  mins(e: any): number { return e.timer_started_at && this.timer.running()?.id === e.id ? this.timer.liveMinutes() : e.minutes; }
   gridRows = computed(() => {
-    const map = new Map<number, { project: any; byDay: Record<string, number>; total: number }>();
+    const map = new Map<number, { project: any; byDay: Record<string, number>; total: number; live: string | null }>();
     for (const e of this.entries()) {
-      const row = map.get(e.project_id) ?? { project: e.project, byDay: {}, total: 0 };
-      row.byDay[e.work_date] = (row.byDay[e.work_date] ?? 0) + e.minutes;
-      row.total += e.minutes;
+      const row = map.get(e.project_id) ?? { project: e.project, byDay: {}, total: 0, live: null };
+      const m = this.mins(e);
+      row.byDay[e.work_date] = (row.byDay[e.work_date] ?? 0) + m;
+      row.total += m;
+      if (e.timer_started_at) row.live = e.work_date;
       map.set(e.project_id, row);
     }
     return [...map.values()];
   });
-  weekTotal = computed(() => this.entries().reduce((a, e) => a + e.minutes, 0));
+  weekTotal = computed(() => this.entries().reduce((a, e) => a + this.mins(e), 0));
   selectedMinutes = computed(() => this.queue().filter((e) => this.selected().has(e.id)).reduce((a, e) => a + e.minutes, 0));
   queuePeople = computed(() => this.queuePeopleCache());
   uninvoicedTotal = computed(() => this.uninvoiced().reduce((a, e) => a + e.minutes, 0));
 
-  constructor() { if (this.session.can('time.own')) inject(QuickAction).register('Log time', () => this.openNew(null, this.defaultDay())); }
+  constructor() {
+    if (this.session.can('time.own')) inject(QuickAction).register('Log time', () => this.openNew(null, this.defaultDay()));
+    // A timer started or stopped from the top bar shows up here straight away.
+    let lastId: number | null | undefined;
+    effect(() => {
+      const id = this.timer.running()?.id ?? null;
+      if (lastId !== undefined && id !== lastId && untracked(this.weekStart)) {
+        const known = untracked(this.entries).some((e) => e.id === id);
+        if (!known || id === null) this.loadWeek(untracked(this.weekStart));
+      }
+      lastId = id;
+    });
+  }
 
   ngOnInit(): void {
     const t = this.route.snapshot.queryParamMap.get('tab') as any;
     if (!this.session.can('time.own')) this.tab.set('approvals');
     if (t && ['mine', 'approvals', 'uninvoiced'].includes(t)) this.tab.set(t);
-    if (this.session.can('time.own')) this.loadWeek(null);
+    if (this.session.can('time.own')) this.loadWeek(this.today);
     if (this.session.can('time.approve')) this.loadQueue();
     if (this.tab() === 'uninvoiced') this.setTab('uninvoiced');
   }
@@ -318,7 +339,7 @@ export class TimePage implements OnInit {
   dayNum(d: string): string { return String(Number(d.slice(8, 10))); }
   dayName(d: string): string { return new Date(d + 'T12:00:00Z').toLocaleDateString('en-US', { weekday: 'short', timeZone: 'UTC' }); }
   dayProjects(d: string): string { return [...new Set(this.entries().filter((e) => e.work_date === d && e.minutes > 0).map((e) => e.project?.name))].join(', '); }
-  dayTotal(d: string): number { return this.entries().filter((e) => e.work_date === d).reduce((a, e) => a + e.minutes, 0); }
+  dayTotal(d: string): number { return this.entries().filter((e) => e.work_date === d).reduce((a, e) => a + this.mins(e), 0); }
   defaultDay(): string { return this.days().includes(this.today) ? this.today : this.weekStart(); }
   tasksFor(pid: number | null): any[] { return this.projects().find((p) => p.id === pid)?.tasks ?? []; }
   billableDefault(pid: number | null): boolean { return this.projects().find((p) => p.id === pid)?.billing_model !== 'non_billable'; }
@@ -380,7 +401,7 @@ export class TimePage implements OnInit {
   async stopTimer(): Promise<void> {
     try {
       const r = await this.timer.stop();
-      this.toasts.ok(`Logged ${formatDuration(r.entry.minutes)}`);
+      this.toasts.ok(this.timer.stopMessage(r));
       this.loadWeek(this.weekStart());
     } catch (e) { this.toasts.error(apiError(e).message); }
   }
