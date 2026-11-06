@@ -1,0 +1,252 @@
+[
+  {
+    "file": "people/avery-brooks.jpg",
+    "persona": "Avery Brooks",
+    "creator": "Clay Elliot",
+    "source": "https://unsplash.com/photos/woman-in-red-cardigan-smiling-mpDV4xaFP8c",
+    "image": "https://images.unsplash.com/photo-1627161683077-e34782c24d81",
+    "license": "Unsplash License (free commercial use, no attribution required)",
+    "retrieved": "2026-11-06",
+    "crop": "256x256, fit=crop, crop=faces"
+  },
+  {
+    "file": "people/jordan-ellis.jpg",
+    "persona": "Jordan Ellis",
+    "creator": "LinkedIn Sales Solutions",
+    "source": "https://unsplash.com/photos/man-standing-beside-wall-pAtA8xe_iVM",
+    "image": "https://images.unsplash.com/photo-1560250097-0b93528c311a",
+    "license": "Unsplash License (free commercial use, no attribution required)",
+    "retrieved": "2026-11-06",
+    "crop": "256x256, fit=crop, crop=faces"
+  },
+  {
+    "file": "people/priya-raman.jpg",
+    "persona": "Priya Raman",
+    "creator": "Andre Styles",
+    "source": "https://unsplash.com/photos/woman-in-gray-crew-neck-shirt-Bg3JaBhnrg4",
+    "image": "https://images.unsplash.com/photo-1609371497456-3a55a205d5eb",
+    "license": "Unsplash License (free commercial use, no attribution required)",
+    "retrieved": "2026-11-06",
+    "crop": "256x256, fit=crop, crop=faces"
+  },
+  {
+    "file": "people/marcus-webb.jpg",
+    "persona": "Marcus Webb",
+    "creator": "Olawale Munna",
+    "source": "https://unsplash.com/photos/a-man-in-a-suit-and-glasses-posing-for-a-picture-qpyR0WKV_Cs",
+    "image": "https://images.unsplash.com/photo-1642257859842-c95f9fa8121d",
+    "license": "Unsplash License (free commercial use, no attribution required)",
+    "retrieved": "2026-11-06",
+    "crop": "256x256, fit=crop, crop=faces"
+  },
+  {
+    "file": "people/leo-martins.jpg",
+    "persona": "Leo Martins",
+    "creator": "Jurica Koletić",
+    "source": "https://unsplash.com/photos/man-wearing-henley-top-portrait-7YVZYZeITc8",
+    "image": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e",
+    "license": "Unsplash License (free commercial use, no attribution required)",
+    "retrieved": "2026-11-06",
+    "crop": "256x256, fit=crop, crop=faces"
+  },
+  {
+    "file": "people/hana-sato.jpg",
+    "persona": "Hana Sato",
+    "creator": "panitan punpuang",
+    "source": "https://unsplash.com/photos/woman-in-black-shirt-smiling-OuxJHYeUYpk",
+    "image": "https://images.unsplash.com/photo-1600481176431-47ad2ab2745d",
+    "license": "Unsplash License (free commercial use, no attribution required)",
+    "retrieved": "2026-11-06",
+    "crop": "256x256, fit=crop, crop=faces"
+  },
+  {
+    "file": "people/grace-okafor.jpg",
+    "persona": "Grace Okafor",
+    "creator": "alex starnes",
+    "source": "https://unsplash.com/photos/woman-in-white-scoop-neck-shirt-smiling-WYE2UhXsU1Y",
+    "image": "https://images.unsplash.com/photo-1611432579699-484f7990b127",
+    "license": "Unsplash License (free commercial use, no attribution required)",
+    "retrieved": "2026-11-06",
+    "crop": "256x256, fit=crop, crop=faces"
+  },
+  {
+    "file": "people/maya-chen.jpg",
+    "persona": "Maya Chen",
+    "creator": "Mathias Huysmans",
+    "source": "https://unsplash.com/photos/woman-in-pink-crew-neck-shirt-in-closeup-photography-U4JDjYmjn1g",
+    "image": "https://images.unsplash.com/photo-1534751516642-a1af1ef26a56",
+    "license": "Unsplash License (free commercial use, no attribution required)",
+    "retrieved": "2026-11-06",
+    "crop": "256x256, fit=crop, crop=faces"
+  },
+  {
+    "file": "people/tomas-rivera.jpg",
+    "persona": "Tomás Rivera",
+    "creator": "Joseph Gonzalez",
+    "source": "https://unsplash.com/photos/man-wearing-white-v-neck-shirt-iFgRcqHznqg",
+    "image": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d",
+    "license": "Unsplash License (free commercial use, no attribution required)",
+    "retrieved": "2026-11-06",
+    "crop": "256x256, fit=crop, crop=faces"
+  },
+  {
+    "file": "people/sam-patel.jpg",
+    "persona": "Sam Patel",
+    "creator": "Chris Blonk",
+    "source": "https://unsplash.com/photos/man-wearing-black-polo-shirt-outdoor-during-daytime-Bn5cob0k9gE",
+    "image": "https://images.unsplash.com/photo-1564490215983-296e5f56b623",
+    "license": "Unsplash License (free commercial use, no attribution required)",
+    "retrieved": "2026-11-06",
+    "crop": "256x256, fit=crop, crop=faces"
+  },
+  {
+    "file": "people/elena-novak.jpg",
+    "persona": "Elena Novak",
+    "creator": "Michael Dam",
+    "source": "https://unsplash.com/photos/closeup-photography-of-woman-smiling-mEZ3PoFGs_k",
+    "image": "https://images.unsplash.com/photo-1494790108377-be9c29b29330",
+    "license": "Unsplash License (free commercial use, no attribution required)",
+    "retrieved": "2026-11-06",
+    "crop": "256x256, fit=crop, crop=faces"
+  },
+  {
+    "file": "people/noah-kim.jpg",
+    "persona": "Noah Kim",
+    "creator": "Dylan Ferreira",
+    "source": "https://unsplash.com/photos/man-in-blue-button-up-shirt-smiling-jIM8kVsFKlM",
+    "image": "https://images.unsplash.com/photo-1579420593648-0deba81fd762",
+    "license": "Unsplash License (free commercial use, no attribution required)",
+    "retrieved": "2026-11-06",
+    "crop": "256x256, fit=crop, crop=faces"
+  },
+  {
+    "file": "people/iris-lindqvist.jpg",
+    "persona": "Iris Lindqvist",
+    "creator": "Giorgio Trovato",
+    "source": "https://unsplash.com/photos/a-woman-with-long-blonde-hair-wearing-a-black-shirt-VzusBjHlKM8",
+    "image": "https://images.unsplash.com/photo-1699899657680-421c2c2d5064",
+    "license": "Unsplash License (free commercial use, no attribution required)",
+    "retrieved": "2026-11-06",
+    "crop": "256x256, fit=crop, crop=faces"
+  },
+  {
+    "file": "people/dana-fischer.jpg",
+    "persona": "Dana Fischer",
+    "creator": "Christina @ wocintechchat.com M",
+    "source": "https://unsplash.com/photos/woman-on-focus-photography-SJvDxw0azqw",
+    "image": "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e",
+    "license": "Unsplash License (free commercial use, no attribution required)",
+    "retrieved": "2026-11-06",
+    "crop": "256x256, fit=crop, crop=faces"
+  },
+  {
+    "file": "people/rhea-lund.jpg",
+    "persona": "Rhea Lund (client contact)",
+    "creator": "Connor Wilkins",
+    "source": "https://unsplash.com/photos/woman-in-gray-jacket-2crxTr4jCkc",
+    "image": "https://images.unsplash.com/photo-1553514029-1318c9127859",
+    "license": "Unsplash License (free commercial use, no attribution required)",
+    "retrieved": "2026-11-06",
+    "crop": "256x256, fit=crop, crop=faces"
+  },
+  {
+    "file": "people/owen-price.jpg",
+    "persona": "Owen Price (client contact)",
+    "creator": "Tony Luginsland",
+    "source": "https://unsplash.com/photos/a-man-in-a-suit-posing-for-a-picture-bbOOTiq-EPA",
+    "image": "https://images.unsplash.com/photo-1652471943570-f3590a4e52ed",
+    "license": "Unsplash License (free commercial use, no attribution required)",
+    "retrieved": "2026-11-06",
+    "crop": "256x256, fit=crop, crop=faces"
+  },
+  {
+    "file": "people/dr-celia-moreau.jpg",
+    "persona": "Dr. Celia Moreau (client contact)",
+    "creator": "Ashwin Vaswani",
+    "source": "https://unsplash.com/photos/woman-wearing-blue-top-1CoyeOsvqG4",
+    "image": "https://images.unsplash.com/photo-1547212371-eb5e6a4b590c",
+    "license": "Unsplash License (free commercial use, no attribution required)",
+    "retrieved": "2026-11-06",
+    "crop": "256x256, fit=crop, crop=faces"
+  },
+  {
+    "file": "people/victor-hale.jpg",
+    "persona": "Victor Hale (client contact)",
+    "creator": "itay verchik",
+    "source": "https://unsplash.com/photos/man-in-black-suit-jacket-YmQ8TrsieE4",
+    "image": "https://images.unsplash.com/photo-1600878459138-e1123b37cb30",
+    "license": "Unsplash License (free commercial use, no attribution required)",
+    "retrieved": "2026-11-06",
+    "crop": "256x256, fit=crop, crop=faces"
+  },
+  {
+    "file": "people/ines-duarte.jpg",
+    "persona": "Ines Duarte (client contact)",
+    "creator": "Štefan Štefančík",
+    "source": "https://unsplash.com/photos/smiling-woman-wearing-white-and-black-pinstriped-collared-top-QXevDflbl8A",
+    "image": "https://images.unsplash.com/photo-1544005313-94ddf0286df2",
+    "license": "Unsplash License (free commercial use, no attribution required)",
+    "retrieved": "2026-11-06",
+    "crop": "256x256, fit=crop, crop=faces"
+  },
+  {
+    "file": "people/paula-greer.jpg",
+    "persona": "Paula Greer (client contact)",
+    "creator": "Joecalih",
+    "source": "https://unsplash.com/photos/a-young-professional-woman-smiling-against-a-white-background-1l6UeCc9P9o",
+    "image": "https://images.unsplash.com/photo-1765005204058-10418f5123c5",
+    "license": "Unsplash License (free commercial use, no attribution required)",
+    "retrieved": "2026-11-06",
+    "crop": "256x256, fit=crop, crop=faces"
+  },
+  {
+    "file": "people/kofi-mensah.jpg",
+    "persona": "Kofi Mensah (client contact)",
+    "creator": "Ryan Hoffman",
+    "source": "https://unsplash.com/photos/man-in-black-crew-neck-long-sleeve-shirt-Ft4p5E9HjTQ",
+    "image": "https://images.unsplash.com/photo-1595211877493-41a4e5f236b3",
+    "license": "Unsplash License (free commercial use, no attribution required)",
+    "retrieved": "2026-11-06",
+    "crop": "256x256, fit=crop, crop=faces"
+  },
+  {
+    "file": "people/lydia-shaw.jpg",
+    "persona": "Lydia Shaw (client contact)",
+    "creator": "Evgeny Bauder",
+    "source": "https://unsplash.com/photos/woman-in-white-crew-neck-shirt-POtlM7Oa0mE",
+    "image": "https://images.unsplash.com/photo-1611451444023-7fe9d86fe1d0",
+    "license": "Unsplash License (free commercial use, no attribution required)",
+    "retrieved": "2026-11-06",
+    "crop": "256x256, fit=crop, crop=faces"
+  },
+  {
+    "file": "people/marta-ruiz.jpg",
+    "persona": "Marta Ruiz (client contact)",
+    "creator": "Christina @ wocintechchat.com M",
+    "source": "https://unsplash.com/photos/smiling-woman-sitting-on-black-chair-kXmKqYOGA4Y",
+    "image": "https://images.unsplash.com/photo-1573497161161-c3e73707e25c",
+    "license": "Unsplash License (free commercial use, no attribution required)",
+    "retrieved": "2026-11-06",
+    "crop": "256x256, fit=crop, crop=faces"
+  },
+  {
+    "file": "people/jules-hart.jpg",
+    "persona": "Jules Hart (client contact)",
+    "creator": "Albert Dera",
+    "source": "https://unsplash.com/photos/mans-grey-and-black-shirt-ILip77SbmOE",
+    "image": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d",
+    "license": "Unsplash License (free commercial use, no attribution required)",
+    "retrieved": "2026-11-06",
+    "crop": "256x256, fit=crop, crop=faces"
+  },
+  {
+    "file": "people/nadia-bloom.jpg",
+    "persona": "Nadia Bloom (client contact)",
+    "creator": "Leandra Rieger",
+    "source": "https://unsplash.com/photos/woman-in-white-shirt-wearing-silver-necklace-5yo65pSHp50",
+    "image": "https://images.unsplash.com/photo-1624091844772-554661d10173",
+    "license": "Unsplash License (free commercial use, no attribution required)",
+    "retrieved": "2026-11-06",
+    "crop": "256x256, fit=crop, crop=faces"
+  }
+]

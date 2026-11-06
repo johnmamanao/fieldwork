@@ -1,0 +1,7 @@
+.env
+.seenry/
+web/node_modules/
+web/dist/
+web/.angular/
+api/vendor/
+api/storage/*.key

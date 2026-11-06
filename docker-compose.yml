@@ -1,0 +1,123 @@
+name: fieldwork
+
+x-api: &api
+  build:
+    context: ./docker/api
+  image: fieldwork-api:dev
+  restart: unless-stopped
+  env_file: .env
+  volumes:
+    - ./api:/var/www/api
+    - api_vendor:/var/www/api/vendor
+    - api_storage:/var/www/api/storage/app
+  depends_on:
+    database:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
+
+services:
+  gateway:
+    restart: unless-stopped
+    image: nginx:1.27-alpine
+    ports:
+      - "${GATEWAY_PORT:-8080}:80"
+    volumes:
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./api/public:/var/www/api/public:ro
+    depends_on:
+      api:
+        condition: service_healthy
+      frontend:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/healthz"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  frontend:
+    restart: unless-stopped
+    image: node:22-alpine
+    working_dir: /app
+    command: sh -c "npm ci --no-audit --no-fund && npx ng serve --host 0.0.0.0 --port 4200 --poll 1500"
+    environment:
+      - NG_CLI_ANALYTICS=false
+    volumes:
+      - ./web:/app
+      - web_node_modules:/app/node_modules
+    expose:
+      - "4200"
+
+  api:
+    <<: *api
+    environment:
+      - CONTAINER_ROLE=app
+    healthcheck:
+      test: ["CMD-SHELL", "php artisan app:ready || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 30
+      start_period: 120s
+
+  worker:
+    <<: *api
+    user: www-data
+    environment:
+      - CONTAINER_ROLE=worker
+    depends_on:
+      api:
+        condition: service_healthy
+
+  scheduler:
+    <<: *api
+    user: www-data
+    environment:
+      - CONTAINER_ROLE=scheduler
+    depends_on:
+      api:
+        condition: service_healthy
+
+  database:
+    restart: unless-stopped
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: ${DB_DATABASE:-fieldwork}
+      POSTGRES_USER: ${DB_USERNAME:-fieldwork}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-fieldwork}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./docker/postgres/init-test-db.sql:/docker-entrypoint-initdb.d/init-test-db.sql:ro
+    ports:
+      - "${DB_FORWARD_PORT:-54329}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-fieldwork} -d ${DB_DATABASE:-fieldwork}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    restart: unless-stopped
+    image: redis:7-alpine
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  mailpit:
+    restart: unless-stopped
+    image: axllent/mailpit:v1.21
+    ports:
+      - "${MAILPIT_PORT:-8025}:8025"
+    expose:
+      - "1025"
+
+volumes:
+  db_data:
+  redis_data:
+  api_vendor:
+  api_storage:
+  web_node_modules:
