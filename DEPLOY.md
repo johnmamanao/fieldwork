@@ -1,5 +1,7 @@
 # Deploying Fieldwork on Vercel (free tiers)
 
+Live: the site is at https://getfieldwork.vercel.app (the API at https://fieldwork-api.vercel.app). `fieldwork.vercel.app` belongs to another Vercel account, so the site uses `getfieldwork`; the address is set under the site project's **Settings → Domains**, and `FRONTEND_URL` on the API project must match it.
+
 Fieldwork runs as two Vercel projects from this one repository, plus a free Postgres database and a free file bucket:
 
 | Piece | Where | Free tier used |
@@ -57,7 +59,7 @@ You can skip this step to start: uploads and exports then work only until the fu
 | `APP_DEBUG` | `false` |
 | `APP_KEY` | `base64:...` (generate below) |
 | `APP_URL` | `https://fieldwork-api.vercel.app` |
-| `FRONTEND_URL` | the site's address from step 4, for example `https://fieldwork.vercel.app` (used in email links) |
+| `FRONTEND_URL` | the site's address from step 4, for example `https://getfieldwork.vercel.app` (used in email links) |
 | `DB_CONNECTION` | `pgsql` |
 | `DB_URL` | the Neon connection string |
 | `DB_SSLMODE` | `require` |
