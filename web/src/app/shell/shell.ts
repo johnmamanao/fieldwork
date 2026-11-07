@@ -98,6 +98,11 @@ const ROLE_LABEL: Record<string, string> = { owner: 'Owner', admin: 'Administrat
     :host(.rail) .foot { width: 100%; align-items: center; }
     :host(.rail) .me { padding: var(--space-1) 0 0; justify-content: center; }
     :host(.rail) .me .more { display: none; }
+    /* The sidebar clips sideways overflow, so in the 76px rail its menus open beside it rather than inside it. */
+    /* The sticky sidebar is its own stacking layer; lift it above the page so those menus are not painted under it. */
+    :host(.rail) aside { z-index: 25; }
+    :host(.rail) .me .popover { position: fixed; left: calc(76px + var(--space-2)); bottom: var(--space-3); transform-origin: bottom left; }
+    :host(.rail) .ws .popover { position: fixed; left: calc(76px + var(--space-2)); top: var(--space-4); transform-origin: top left; }
     @media (max-width: 1199px) { header { padding: 0 var(--space-5); } }
 
     /* ---- phone: top bar + bottom tabs; the sidebar becomes the "More" drawer ---- */
