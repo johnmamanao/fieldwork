@@ -2,11 +2,46 @@
 
 Fieldwork connects client projects, delivery, staff capacity, time tracking, invoicing, payments and analytics for a services studio. Operational records drive every dashboard figure, and each figure links back to the records behind it.
 
-- **API:** Laravel 13 (PHP 8.4), Sanctum bearer tokens, PostgreSQL 17, Redis queues and cache
-- **Web:** Angular 21 (standalone components, signals, zoneless)
-- **Local stack:** Docker Compose with an nginx gateway, Angular dev server, PHP-FPM API, queue worker, scheduler, Postgres, Redis and Mailpit
-
 It is built from `psa-complete-modules.md`. The design direction is described in [DESIGN.md](DESIGN.md).
+
+## Tech stack
+
+**Frontend** (`web/`)
+
+| | |
+|---|---|
+| Framework | [Angular 21](https://angular.dev): standalone components, signals, zoneless change detection, `OnPush` components |
+| Language | TypeScript 5.9, RxJS 7.8 |
+| Build and dev server | Angular CLI with `@angular/build` (Vite and esbuild) |
+| Styling | Plain CSS on one token file (`web/src/styles.css`: spacing, type, radius, colour and motion tokens); no UI kit |
+| Type | [Manrope](https://fonts.google.com/specimen/Manrope) and [Geist Mono](https://fonts.google.com/specimen/Geist+Mono) |
+| Graphics | Drawn in code with Canvas and SVG: the hours-grid hero, the analytics skyline, charts, the ASCII wordmark and the logo |
+
+**Backend** (`api/`)
+
+| | |
+|---|---|
+| Framework | [Laravel 13](https://laravel.com) on PHP 8.4 (PHP-FPM) |
+| Auth | Laravel Sanctum bearer tokens, with workspace scoping on every request (`X-Workspace-Id`) |
+| Database | PostgreSQL 17 |
+| Queues and cache | Redis 7, with a queue worker and the Laravel scheduler as separate containers |
+| Email | Blade HTML and plain-text templates; Mailpit captures mail locally |
+| Tests and tooling | PHPUnit 12, Mockery, Faker, Laravel Pint |
+
+**Infrastructure**
+
+| | |
+|---|---|
+| Local stack | Docker Compose: nginx 1.27 gateway, Node 22 (Angular dev server), PHP 8.4 API, worker, scheduler, Postgres, Redis and Mailpit |
+| Formatting | Prettier (web), Pint (API) |
+
+**Product video** (`film/`)
+
+| | |
+|---|---|
+| Picture | A seekable HTML page where every frame is a function of time, rendered frame by frame with Playwright and ffmpeg (H.264, 1920x1080, 30 fps) |
+| Footage | Real screen recordings of the running app via the Chrome DevTools Protocol screencast (`film/rec.mjs`) |
+| Sound | Score and sound effects synthesised in Python with NumPy (`film/synth.py`), mixed to -14 LUFS |
 
 ---
 
