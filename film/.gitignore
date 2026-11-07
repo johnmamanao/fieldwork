@@ -1,0 +1,9 @@
+study/
+*.mp4
+*.m4a
+stills/
+media/raw/
+media/rec/
+.review/
+*.wav
+mix.m4a

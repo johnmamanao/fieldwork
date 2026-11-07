@@ -1,0 +1,205 @@
+{
+  "duration": 64,
+  "bpm": 120,
+  "video": "film.silent.mp4",
+  "out": "film.mp4",
+  "music": {
+    "file": "media/music.wav",
+    "edit": [
+      [
+        0,
+        null
+      ]
+    ],
+    "fade_out": 2.0,
+    "gain_db": 0
+  },
+  "sfx": [
+    {
+      "file": "media/sfx/swish.wav",
+      "at": 8.15,
+      "gain": 0.26
+    },
+    {
+      "file": "media/sfx/thud.wav",
+      "at": 8.3,
+      "gain": 0.28
+    },
+    {
+      "file": "media/sfx/thud.wav",
+      "at": 10.0,
+      "gain": 0.24
+    },
+    {
+      "file": "media/sfx/swish.wav",
+      "at": 10.75,
+      "gain": 0.2
+    },
+    {
+      "file": "media/sfx/thud.wav",
+      "at": 11.2,
+      "gain": 0.28
+    },
+    {
+      "file": "media/sfx/swish.wav",
+      "at": 11.95,
+      "gain": 0.2
+    },
+    {
+      "file": "media/sfx/thud.wav",
+      "at": 12.4,
+      "gain": 0.28
+    },
+    {
+      "file": "media/sfx/tick.wav",
+      "at": 14.2,
+      "gain": 0.32
+    },
+    {
+      "file": "media/sfx/thud.wav",
+      "at": 14.4,
+      "gain": 0.3
+    },
+    {
+      "file": "media/sfx/swish.wav",
+      "at": 14.95,
+      "gain": 0.2
+    },
+    {
+      "file": "media/sfx/tick.wav",
+      "at": 16.3,
+      "gain": 0.28
+    },
+    {
+      "file": "media/sfx/tick.wav",
+      "at": 17.9,
+      "gain": 0.28
+    },
+    {
+      "file": "media/sfx/thud.wav",
+      "at": 18.4,
+      "gain": 0.3
+    },
+    {
+      "file": "media/sfx/tick.wav",
+      "at": 19.3,
+      "gain": 0.3
+    },
+    {
+      "file": "media/sfx/thud.wav",
+      "at": 19.4,
+      "gain": 0.28
+    },
+    {
+      "file": "media/sfx/lock.wav",
+      "at": 20.5,
+      "gain": 0.4
+    },
+    {
+      "file": "media/sfx/lock.wav",
+      "at": 21.0,
+      "gain": 0.34
+    },
+    {
+      "file": "media/sfx/lock.wav",
+      "at": 21.5,
+      "gain": 0.3
+    },
+    {
+      "file": "media/sfx/swish.wav",
+      "at": 23.95,
+      "gain": 0.22
+    },
+    {
+      "file": "media/sfx/thud.wav",
+      "at": 24.9,
+      "gain": 0.28
+    },
+    {
+      "file": "media/sfx/tick.wav",
+      "at": 25.3,
+      "gain": 0.3
+    },
+    {
+      "file": "media/sfx/thud.wav",
+      "at": 26.0,
+      "gain": 0.32
+    },
+    {
+      "file": "media/sfx/chime.wav",
+      "at": 26.05,
+      "gain": 0.24,
+      "length": 1.6
+    },
+    {
+      "file": "media/sfx/thud.wav",
+      "at": 31.6,
+      "gain": 0.22
+    },
+    {
+      "file": "media/sfx/thud.wav",
+      "at": 33.0,
+      "gain": 0.22
+    },
+    {
+      "file": "media/sfx/thud.wav",
+      "at": 34.4,
+      "gain": 0.22
+    },
+    {
+      "file": "media/sfx/swish.wav",
+      "at": 35.95,
+      "gain": 0.14
+    },
+    {
+      "file": "media/sfx/swish.wav",
+      "at": 37.61666666666667,
+      "gain": 0.14
+    },
+    {
+      "file": "media/sfx/swish.wav",
+      "at": 39.28333333333334,
+      "gain": 0.14
+    },
+    {
+      "file": "media/sfx/swish.wav",
+      "at": 40.95,
+      "gain": 0.14
+    },
+    {
+      "file": "media/sfx/swish.wav",
+      "at": 42.61666666666667,
+      "gain": 0.14
+    },
+    {
+      "file": "media/sfx/swish.wav",
+      "at": 44.28333333333334,
+      "gain": 0.14
+    },
+    {
+      "file": "media/sfx/swish.wav",
+      "at": 46.0,
+      "gain": 0.2
+    },
+    {
+      "file": "media/sfx/swish.wav",
+      "at": 46.5,
+      "gain": 0.16
+    },
+    {
+      "file": "media/sfx/chime.wav",
+      "at": 57.4,
+      "gain": 0.3
+    },
+    {
+      "file": "media/sfx/tick.wav",
+      "at": 58.5,
+      "gain": 0.25
+    }
+  ],
+  "sfx_duck_db": 2,
+  "loudness": {
+    "lufs": -14,
+    "true_peak": -1.5
+  }
+}

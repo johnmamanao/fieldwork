@@ -1,0 +1,50 @@
+{
+ "quick": {
+  "x": 1180,
+  "y": 58,
+  "width": 340,
+  "height": 260
+ },
+ "quickBtn": {
+  "x": 1394.78125,
+  "y": 14,
+  "width": 125.21875,
+  "height": 36
+ },
+ "barTimer": {
+  "x": 1173.859375,
+  "y": 14,
+  "width": 346.140625,
+  "height": 36
+ },
+ "runCard": {
+  "x": 296,
+  "y": 237,
+  "width": 1272,
+  "height": 128
+ },
+ "liveCell": {
+  "x": 1166.34375,
+  "y": 600,
+  "width": 57.578125,
+  "height": 32
+ },
+ "grid": {
+  "x": 296,
+  "y": 433,
+  "width": 1272,
+  "height": 260
+ },
+ "lockedWeek": {
+  "x": 340,
+  "y": 373,
+  "width": 110.59375,
+  "height": 24
+ },
+ "skyStage": {
+  "x": 960,
+  "y": 0,
+  "width": 640,
+  "height": 1000
+ }
+}

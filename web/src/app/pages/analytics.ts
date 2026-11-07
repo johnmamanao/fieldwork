@@ -198,7 +198,7 @@ import { FILL, Skyline } from '../shared/skyline';
           </section>
 
           @if (skyOpen() ? sky() : null; as sk) {
-            <dialog fwModal #sd class="modal side" aria-label="Billable hours by day" (cancel)="$event.preventDefault(); skyOpen.set(false)" (click)="$event.target === sd && skyOpen.set(false)">
+            <dialog fwModal #sd class="modal side" aria-label="Billable hours by day" (cancel)="$event.preventDefault(); skyOpen.set(false)" (click)="$event.target === sd ? skyOpen.set(false) : null">
               <aside class="sky">
                 <header class="sky-head">
                   <div class="grow"><h2>Billable hours by day</h2><p class="small muted">{{ session.workspace()?.name }} · {{ sk.start | day }} – {{ endInclusive(sk.end_exclusive) | day }}</p></div>

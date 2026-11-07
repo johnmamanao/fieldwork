@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fieldwork — product film</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Geist+Mono:wght@500&display=block" rel="stylesheet">
+<style>
+/* Fieldwork, 60 s at 120 BPM. Every visual is a pure function of t (window.__seek). Real captures in media/shots. */
+:root{
+  --light:#f5f4f2; --ink:#121214; --ink-2:#55565c; --verm:#f0512a; --verm-d:#b4351a; --coral:#ffcdbd;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#000;overflow:hidden}
+body{font-family:Manrope,system-ui,sans-serif;-webkit-font-smoothing:antialiased;color:var(--ink)}
+#stage{position:absolute;width:1920px;height:1080px;transform-origin:0 0;overflow:hidden;background:var(--light)}
+.layer{position:absolute;inset:0}
+.mono{font-family:"Geist Mono",ui-monospace,monospace}
+
+/* hook: the hours grid, drawn */
+#hook{background:var(--verm-d)}
+#hook canvas{position:absolute;inset:0;width:1920px;height:1080px}
+#hook h1{position:absolute;left:0;right:0;top:372px;text-align:center;color:#fff;font-size:120px;line-height:1.08;font-weight:600;letter-spacing:-.035em}
+#hook h1 .l2{color:var(--coral)}
+#hook h1 span{display:inline-block;will-change:transform,opacity}
+
+/* product shots: a window that frames one region of a real capture */
+.shot{position:absolute;left:200px;top:72px;width:1520px;height:760px;border-radius:18px;overflow:hidden;background:#fff;
+  box-shadow:0 0 0 1px rgba(18,18,20,.08),0 50px 110px -50px rgba(18,18,20,.35)}
+.shot img{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform}
+.shot .img2{opacity:0}
+.ring{position:absolute;border-radius:10px;box-shadow:0 0 0 4px var(--verm),0 0 0 14px rgba(240,81,42,.18);opacity:0;pointer-events:none}
+.stamp{position:absolute;display:flex;align-items:center;gap:10px;padding:0 16px;height:46px;border-radius:8px;background:var(--ink);color:#fff;
+  font:500 24px "Geist Mono",monospace;letter-spacing:.06em;text-transform:uppercase;opacity:0;white-space:nowrap}
+.stamp i{width:10px;height:10px;background:var(--verm)}
+.cap{position:absolute;left:0;right:0;top:884px;text-align:center;font-size:56px;font-weight:600;letter-spacing:-.025em;line-height:1.15;color:var(--ink)}
+.cap b{color:var(--verm-d);font-weight:700}
+.idx{position:absolute;left:0;right:0;top:966px;text-align:center;font:500 28px "Geist Mono",monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
+.idx em{font-style:normal;color:var(--verm)}
+
+/* recap: the five records in a row */
+#recap .tile{position:absolute;top:300px;border-radius:14px;overflow:hidden;background:#fff;
+  box-shadow:0 0 0 1px rgba(18,18,20,.08),0 30px 60px -30px rgba(18,18,20,.3)}
+#recap .tile img{position:absolute;left:0;top:0;transform-origin:0 0}
+#recap .tl{position:absolute;text-align:center;font:500 28px "Geist Mono",monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
+#recap .link{position:absolute;height:4px;background:var(--ink);transform-origin:0 50%}
+
+/* end card */
+#end{background:var(--ink);color:#fff}
+#end canvas{position:absolute;left:0;top:250px;width:1920px;height:330px}
+#end .line{position:absolute;left:0;right:0;top:640px;text-align:center;font-size:48px;font-weight:500;letter-spacing:-.02em;color:rgba(255,255,255,.82)}
+#end .cta{position:absolute;left:50%;top:760px;transform:translateX(-50%);height:76px;padding:0 40px;display:flex;align-items:center;
+  background:var(--verm);color:var(--ink);font:500 30px "Geist Mono",monospace;letter-spacing:.08em;text-transform:uppercase}
+#end .cta::before,#end .cta::after{content:'';position:absolute;width:20px;height:28px;background:var(--verm)}
+#end .cta::before{left:-12px;bottom:12px} #end .cta::after{right:-12px;top:12px}
+
+#hud{position:fixed;left:0;right:0;bottom:0;display:flex;gap:14px;align-items:center;padding:12px 18px;background:rgba(0,0,0,.6);color:#aaa;font:13px ui-monospace,Menlo,monospace;z-index:10}
+#hud input{flex:1}
+#hud button{background:#222;color:#ddd;border:0;border-radius:8px;padding:6px 12px;font:inherit;cursor:pointer}
+body.render #hud{display:none}
+</style>
+</head>
+<body>
+<div id="stage">
+  <section class="layer" id="hook"><canvas id="grid" width="1920" height="1080"></canvas><h1 id="claim"></h1></section>
+  <section class="layer" id="product">
+    <div class="shot" id="shot"><div class="ring" id="ring"></div></div>
+    <div class="cap" id="cap"></div>
+    <div class="idx" id="idx"></div>
+  </section>
+  <section class="layer" id="recap"></section>
+  <section class="layer" id="end"><canvas id="word" width="1920" height="330"></canvas>
+    <div class="line" id="endLine">Time, invoices and payments for studios.</div>
+    <div class="cta" id="cta">Open the demo studio</div></section>
+</div>
+<div id="hud"><button id="play">Pause</button><input id="scrub" type="range" min="0" step="0.01"><span id="time">0.00</span></div>
+<script>
+/* ---------- film contract ---------- */
+const FILM = {duration: 60, width: 1920, height: 1080, bpm: 120};
+const BAR = 240 / FILM.bpm;   // 2 s
+window.__film = FILM;
+
+/* ---------- helpers ---------- */
+const $ = id => document.getElementById(id);
+const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+const prog = (t, a, b) => clamp((t - a) / (b - a));
+const lerp = (a, b, p) => a + (b - a) * p;
+const E = { out: p => 1 - (1 - p) ** 3, out5: p => 1 - (1 - p) ** 5, inOut: p => p < .5 ? 4 * p ** 3 : 1 - (-2 * p + 2) ** 3 / 2, inOut2: p => p < .5 ? 2 * p * p : 1 - (-2 * p + 2) ** 2 / 2 };
+function hash(x, y, s) { let h = (x * 374761393 + y * 668265263 + s * 2147483647) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967295; }
+
+/* ---------- the shots: a real capture, camera keyframes in page px (1600-wide pages), one line ---------- */
+// keys: [time, {x, y, w}] with h = w / 2 (the window is 2:1). Between keys the camera eases in-out;
+// a key at the same crop holds still. Each shot opens wide to orient, then holds a tight, readable detail.
+const SHOTS = [
+  {a: 4, b: 10, img: '01-quick-start', img2: '02-timer-bar', swap: 8.6, cut: true,
+   keys: [[4, {x: 260, y: 0, w: 1340}], [5.0, {x: 260, y: 0, w: 1340}], [6.2, {x: 1060, y: 44, w: 560}], [8.5, {x: 1060, y: 44, w: 560}], [8.6, {x: 1060, y: 0, w: 560}], [10, {x: 1080, y: 0, w: 540}]],
+   ring: {x: 1180, y: 58, w: 340, h: 260, at: 6.4, until: 8.4}, ring2: {x: 1174, y: 14, w: 346, h: 36, at: 8.75},
+   cap: 'Start the clock from any page.', idx: 'Log'},
+  {a: 10, b: 16, img: '03-timesheet-live',
+   keys: [[10, {x: 260, y: 170, w: 1340}], [10.9, {x: 260, y: 170, w: 1340}], [12.1, {x: 300, y: 420, w: 980}], [13.2, {x: 300, y: 420, w: 980}], [14.2, {x: 930, y: 516, w: 400}], [16, {x: 950, y: 524, w: 380}]],
+   ring: {x: 1166, y: 600, w: 58, h: 32, at: 14.3}, cap: 'It counts on the timesheet as it runs.', idx: 'Log'},
+  {a: 16, b: 22, img: '04-approvals',
+   keys: [[16, {x: 260, y: 150, w: 1340}], [16.9, {x: 260, y: 150, w: 1340}], [18.1, {x: 1060, y: 170, w: 540}], [19.9, {x: 1060, y: 170, w: 540}], [20.9, {x: 300, y: 300, w: 760}], [22, {x: 300, y: 304, w: 740}]],
+   ring: {x: 1222, y: 241, w: 352, h: 42, at: 18.3, until: 19.9}, cap: 'Priya approves the team’s <b>submitted time.</b>', idx: 'Approve'},
+  {a: 22, b: 28, img: '05-invoice',
+   keys: [[22, {x: 280, y: 70, w: 960}], [23.6, {x: 280, y: 70, w: 960}], [24.8, {x: 330, y: 470, w: 880}], [28, {x: 336, y: 474, w: 868}]],
+   ring: {x: 340, y: 557, w: 840, h: 72, at: 25.0}, cap: 'Approved time becomes <b>one invoice.</b>', idx: 'LK-0024 · Invoice'},
+  {a: 28, b: 34, img: '06-locked-week',
+   keys: [[28, {x: 300, y: 860, w: 1260}], [29.4, {x: 300, y: 860, w: 1260}], [30.0, {x: 770, y: 890, w: 760}], [34, {x: 780, y: 894, w: 740}]],
+   stamps: [923, 1079, 1235], cap: 'Billed once. <b>Then locked.</b>', idx: 'Locked to LK-0024'},
+  {a: 34, b: 40, img: '07-paid',
+   keys: [[34, {x: 280, y: 60, w: 1100}], [35.6, {x: 280, y: 60, w: 1100}], [36.6, {x: 960, y: 200, w: 620}], [40, {x: 966, y: 204, w: 608}]],
+   ring: {x: 1029, y: 258, w: 153, h: 52, at: 36.8}, ring2: {x: 1465, y: 296, w: 87, h: 36, at: 37.8}, cap: 'A settled payment <b>closes an invoice.</b>', idx: 'LK-0005 · Paid'},
+  {a: 40, b: 48, img: '08-analytics', img2: '09-skyline', swap: 44, cut: true,
+   keys: [[40, {x: 280, y: 60, w: 1320}], [41.2, {x: 290, y: 190, w: 1300}], [43.99, {x: 290, y: 190, w: 1300}], [44, {x: 960, y: 118, w: 640}], [48, {x: 970, y: 124, w: 620}]],
+   ring: {x: 296, y: 216, w: 1272, h: 212, at: 41.4, until: 43.6}, cap: 'See billable hours <b>by day.</b>', idx: 'See it'},
+];
+const IMG = s => `media/shots/${s}.png`;
+
+/* ---------- hook: the hours grid ---------- */
+const G = $('grid').getContext('2d');
+const LEVELS = ['#121214', '#3b140a', '#6e2210', '#982b15', '#b4351a', '#cf411d', '#e64d24', '#fb6a3d', '#ff9a78'];
+function drawGrid(t, opts = {}) {
+  const c = 40, gap = 7, sq = c - gap, cols = Math.ceil(1920 / c) + 1, rows = Math.ceil(1080 / c) + 1;
+  G.fillStyle = '#b4351a'; G.fillRect(0, 0, 1920, 1080);
+  const today = (t * 9) % (cols + 6) - 3;
+  for (let x = 0; x < cols; x++) {
+    const week = .55 + .45 * hash(Math.floor(x / 3), 0, 5);
+    for (let y = 0; y < rows; y++) {
+      const day = y % 7, rhythm = day >= 5 ? .12 : [.75, .9, 1, .92, .7][day];
+      const hours = Math.min(1, rhythm * week * (.55 + .6 * hash(x, y, 5)));
+      const u = (x * c + c / 2) / 1920, v = (y * c + c / 2) / 1080;
+      const e = ((u - .5) / .42) ** 2 + ((v - .5) / .3) ** 2;
+      const calm = clamp((e - .55) / .9);
+      const near = Math.max(0, 1 - Math.abs(x - today) / 1.6);
+      const passed = x < today ? .25 : 0;
+      let lvl = 4 + (hours * 4.4 - 1.4) * calm + near * 2.4 * calm + passed * calm * 1.5;
+      const i = Math.max(0, Math.min(8, Math.round(lvl)));
+      if (i === 4) continue;
+      G.fillStyle = LEVELS[i]; G.fillRect(x * c, y * c, sq, sq);
+    }
+  }
+}
+const CLAIM = [['Every', 'approved', 'hour,'], ['billed', 'once.']];
+$('claim').innerHTML = CLAIM.map((l, i) => `<div class="${i ? 'l2' : ''}">${l.map(w => `<span>${w}</span>`).join(' ')}</div>`).join('');
+const claimWords = [...$('claim').querySelectorAll('span')];
+
+/* ---------- end card: the ASCII wordmark, as on the site ---------- */
+const W = $('word').getContext('2d'), RAMP = ' .:-=+*#%';
+let WORD = null;
+function sampleWord() {
+  const cw = 12, ch = cw * 1.6, cols = Math.floor(1920 / cw), rows = Math.floor(330 / ch);
+  const off = document.createElement('canvas'); off.width = cols; off.height = rows;
+  const o = off.getContext('2d'); let size = rows * 1.02;
+  o.font = `800 ${size}px Manrope`; const fit = () => o.measureText('Fieldwork').width * 1.6;
+  if (fit() > cols * .8) { size *= cols * .8 / fit(); o.font = `800 ${size}px Manrope`; }
+  const m = o.measureText('Fieldwork'), base = rows * .88, top = base - m.actualBoundingBoxAscent;
+  o.fillStyle = '#fff'; o.save(); o.scale(1.6, 1); o.fillText('Fieldwork', (cols - fit()) / 2 / 1.6, base); o.restore();
+  const a = o.getImageData(0, 0, cols, rows).data, cells = [];
+  for (let y = 0; y < rows; y++) { const fall = clamp((y - top) / Math.max(1, base - top));
+    for (let x = 0; x < cols; x++) { const cov = a[(y * cols + x) * 4 + 3] / 255;
+      if (cov > .3) cells.push({x: x * cw, y: y * ch, v: (.55 + .45 * cov) * (1 - .5 * fall) + (hash(x, y, 3) - .5) * .1, core: true});
+      else if (hash(x, y, 9) < .03) cells.push({x: x * cw, y: y * ch, v: .14, core: false}); } }
+  WORD = {cells, cw, ch};
+}
+function drawWord(t, reveal) {
+  if (!WORD) sampleWord();
+  W.clearRect(0, 0, 1920, 330); W.font = `500 ${Math.round(WORD.ch * .9)}px "Geist Mono"`; W.textBaseline = 'top';
+  const scan = ((t - 54) * .28) % 1.6 - .3;
+  for (const c of WORD.cells) {
+    const u = c.x / 1920, appear = clamp((reveal * 1.3 - u) * 4);
+    if (appear <= 0) continue;
+    const lit = c.core ? Math.exp(-(((u - scan) / .06) ** 2)) * .35 : 0;
+    const v = Math.min(1, c.v + lit), k = Math.min(1, v * .85 + lit * 1.4);
+    W.fillStyle = `rgba(${96 + 159 * k | 0},${34 + 140 * k * k | 0},${22 + 130 * k * k | 0},${(.35 + .65 * v) * appear})`;
+    W.fillText(RAMP[Math.max(1, Math.round(v * 8))], c.x, c.y);
+  }
+}
+
+/* ---------- recap: the two results, large enough to read ---------- */
+const RECAP = [
+  {img: '06-locked-week', crop: {x: 1000, y: 890, w: 560}, label: 'Locked to its invoice', ring: {x: 1353, y: 923, w: 86, h: 24}},
+  {img: '07-paid', crop: {x: 968, y: 214, w: 600}, label: 'Settled · $0.00 due', ring: {x: 1029, y: 258, w: 153, h: 52}},
+];
+const RW = 760, RH = 380, RX = i => 160 + i * (RW + 80);
+$('recap').innerHTML = RECAP.map((r, i) => `<div class="tile" id="rt${i}" style="left:${RX(i)}px;width:${RW}px;height:${RH}px"><img src="${IMG(r.img)}" alt=""><div class="ring"></div></div>
+  <div class="tl" id="rl${i}" style="left:${RX(i)}px;width:${RW}px;top:${300 + RH + 28}px">${r.label}</div>`).join('')
+  + `<div class="link" id="rk0" style="left:${RX(0) + RW + 12}px;width:56px;top:${300 + RH / 2}px"></div>`
+  + `<div class="cap" id="rcap">From approved hours <b>to settled invoices.</b></div>`;
+
+/* ---------- camera ---------- */
+function frameCrop(img, crop, win = 1520) {          // place a 1600-wide page image so `crop` fills the window
+  const s = win / crop.w;
+  img.style.width = 1600 * s + 'px';
+  img.style.transform = `translate(${-crop.x * s}px, ${-crop.y * s}px)`;
+  return s;
+}
+const mixCrop = (A, B, p) => ({x: lerp(A.x, B.x, p), y: lerp(A.y, B.y, p), w: lerp(A.w, B.w, p)});
+function camAt(keys, t) {
+  if (t <= keys[0][0]) return keys[0][1];
+  for (let k = 1; k < keys.length; k++) {
+    const [t1, c1] = keys[k], [t0, c0] = keys[k - 1];
+    if (t <= t1) return mixCrop(c0, c1, t1 - t0 < .05 ? 1 : E.inOut(prog(t, t0, t1)));
+  }
+  return keys[keys.length - 1][1];
+}
+function placeRing(el, r, crop, s, t, at, until = 1e9) {
+  const p = E.out5(prog(t, at, at + .35)) * (1 - prog(t, until, until + .3));
+  el.style.opacity = p;
+  Object.assign(el.style, {left: (r.x - crop.x) * s - 6 + 'px', top: (r.y - crop.y) * s - 6 + 'px', width: r.w * s + 12 + 'px', height: r.h * s + 12 + 'px', transform: `scale(${1.04 - .04 * p})`});
+}
+
+// one image element per capture, made up front, so a cut never waits on decoding
+const IMGS = {};
+for (const n of new Set(SHOTS.flatMap(s => [s.img, s.img2].filter(Boolean)))) { const im = new Image(); im.src = IMG(n); im.alt = ''; im.style.display = 'none'; $('shot').insertBefore(im, $('ring')); IMGS[n] = im; }
+let lastShot = -1, stampEls = [], imA = null, imB = null;
+function renderShot(t) {
+  const i = SHOTS.findIndex(s => t >= s.a && t < s.b); const sh = SHOTS[i];
+  if (i !== lastShot) {
+    lastShot = i; Object.values(IMGS).forEach(im => { im.style.display = 'none'; im.style.opacity = 1; });
+    imA = IMGS[sh.img]; imA.style.display = 'block'; imB = sh.img2 ? IMGS[sh.img2] : null; if (imB) { imB.style.display = 'block'; imB.style.opacity = 0; }
+    $('cap').innerHTML = sh.cap; $('idx').innerHTML = `<em>[</em> ${sh.idx} <em>]</em>`;
+    stampEls.forEach(e => e.el.remove()); stampEls = [];
+    for (const y of sh.stamps ?? []) { const d = document.createElement('div'); d.className = 'ring'; $('shot').appendChild(d); stampEls.push({el: d, y}); }
+  }
+  const crop = camAt(sh.keys, t);
+  const s = frameCrop(imA, crop);
+  if (imB) { frameCrop(imB, crop); imB.style.opacity = sh.cut ? (t >= sh.swap ? 1 : 0) : E.out(prog(t, sh.swap, sh.swap + .35)); }
+  // the window rises in and leaves upward on bar lines
+  const inP = E.out5(prog(t, sh.a, sh.a + .55)), outP = E.inOut2(prog(t, sh.b - .35, sh.b));
+  $('shot').style.opacity = inP * (1 - outP);
+  $('shot').style.transform = `translateY(${(1 - inP) * 40 - outP * 30}px) scale(${.985 + .015 * inP})`;
+  if (sh.ring) placeRing($('ring'), sh.ring, crop, s, t, sh.ring.at, sh.ring.until);
+  else $('ring').style.opacity = 0;
+  if (sh.ring2 && t >= sh.ring2.at) placeRing($('ring'), sh.ring2, crop, s, t, sh.ring2.at);
+  // the turn: the app's own "Invoiced" lock on each entry lights up, one per beat
+  stampEls.forEach(({el, y}, k) => placeRing(el, {x: 1353, y, w: 86, h: 24}, crop, s, t, 30 + k * .5));
+  // caption and index: up after the picture lands, gone before the cut
+  const c = E.out5(prog(t, sh.a + .45, sh.a + .95)) * (1 - prog(t, sh.b - .4, sh.b - .1));
+  $('cap').style.opacity = c; $('cap').style.transform = `translateY(${(1 - c) * 18}px)`;
+  $('idx').style.opacity = c * .9;
+}
+
+function renderRecap(t) {
+  RECAP.forEach((r, i) => {
+    const tile = $('rt' + i), img = tile.querySelector('img'), ring = tile.querySelector('.ring');
+    const s = RW / r.crop.w; img.style.width = 1600 * s + 'px'; img.style.transform = `translate(${-r.crop.x * s}px, ${-r.crop.y * s}px)`;
+    const at = 48.2 + i * 1.0, p = E.out5(prog(t, at, at + .5));   // one per bar line half
+    tile.style.opacity = p; tile.style.transform = `translateY(${(1 - p) * 50}px)`;
+    $('rl' + i).style.opacity = p;
+    placeRing(ring, r.ring, r.crop, s, t, at + .5);
+  });
+  $('rk0').style.transform = `scaleX(${E.out(prog(t, 49.0, 49.4))})`;
+  const c = E.out5(prog(t, 49.2, 49.8)) * (1 - prog(t, 53.6, 53.9));
+  $('rcap').style.opacity = c; $('rcap').style.transform = `translateY(${(1 - c) * 18}px)`;
+}
+
+/* ---------- timeline ---------- */
+function render(t) {
+  const hook = t < 4, prod = t >= 4 && t < 48, rec = t >= 48 && t < 54, end = t >= 54;
+  $('hook').style.display = hook ? 'block' : 'none';
+  $('product').style.display = prod ? 'block' : 'none';
+  $('recap').style.display = rec ? 'block' : 'none';
+  $('end').style.display = end ? 'block' : 'none';
+  if (hook) {
+    drawGrid(t);
+    claimWords.forEach((w, i) => { const s = .25 + i * .25, p = E.out5(prog(t, s, s + .45)); w.style.opacity = p; w.style.transform = `translateY(${(1 - p) * 40}px)`; });
+    const out = E.inOut2(prog(t, 3.65, 4)); $('claim').style.opacity = 1 - out;
+  }
+  if (prod) renderShot(t);
+  if (rec) renderRecap(t);
+  if (end) {
+    drawWord(t, E.out(prog(t, 54.1, 55.6)));
+    const l = E.out5(prog(t, 55.4, 56)), c = E.out5(prog(t, 56, 56.6));
+    $('endLine').style.opacity = l; $('endLine').style.transform = `translateY(${(1 - l) * 16}px)`;
+    $('cta').style.opacity = c; $('cta').style.transform = `translateX(-50%) translateY(${(1 - c) * 16}px)`;
+  }
+}
+
+/* ---------- player (hidden with ?render) ---------- */
+function fit() { const s = Math.min(innerWidth / FILM.width, innerHeight / FILM.height), st = $('stage');
+  st.style.transform = `scale(${s})`; st.style.left = (innerWidth - FILM.width * s) / 2 + 'px'; st.style.top = (innerHeight - FILM.height * s) / 2 + 'px'; }
+const RENDER = new URLSearchParams(location.search).has('render');
+if (RENDER) document.body.classList.add('render');
+addEventListener('resize', fit); fit();
+$('scrub').max = FILM.duration;
+let playing = !RENDER, t0 = performance.now(), cur = 0;
+const audio = RENDER ? null : new Audio('mix.m4a');
+function seek(t) { cur = t; render(t); $('scrub').value = t; $('time').textContent = t.toFixed(2); }
+window.__seek = t => { render(t); return true; };
+// preload every capture so seeks never show a half-loaded frame
+const PRE = [...new Set([...SHOTS.flatMap(s => [s.img, s.img2].filter(Boolean)), ...RECAP.map(r => r.img)])].map(n => { const i = new Image(); i.src = IMG(n); return i.decode().catch(() => {}); });
+window.__ready = Promise.all([document.fonts.load('600 120px Manrope'), document.fonts.load('800 60px Manrope'), document.fonts.load('500 24px "Geist Mono"'), document.fonts.ready, ...PRE, ...[...document.images].map(i => i.decode().catch(() => {}))]);
+function tick(now) { if (playing) { cur = ((now - t0) / 1000) % FILM.duration; seek(cur); } requestAnimationFrame(tick); }
+$('play').onclick = () => { playing = !playing; $('play').textContent = playing ? 'Pause' : 'Play'; t0 = performance.now() - cur * 1000;
+  if (audio) { if (playing) { audio.currentTime = cur; audio.play().catch(() => {}); } else audio.pause(); } };
+$('scrub').oninput = e => { playing = false; audio?.pause(); $('play').textContent = 'Play'; seek(+e.target.value); };
+addEventListener('keydown', e => { if (e.code === 'Space') { e.preventDefault(); $('play').click(); } });
+window.__ready.then(() => { t0 = performance.now(); if (!RENDER) requestAnimationFrame(tick); else render(0); });
+</script>
+</body>
+</html>

@@ -143,6 +143,33 @@ const ROLES = [
 
     /* [01] watch */
     .watch { padding: var(--space-10) 0; }
+    /* the 60-second video: a third hero action, a poster in Watch it work, and a full-screen player */
+    .pxb.see { --b: transparent; --f: #fff; box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.7); }
+    .pxb.see::before, .pxb.see::after { display: none; }
+    @media (hover: hover) and (pointer: fine) { .pxb.see:hover { --b: rgb(255 255 255 / 0.12); box-shadow: inset 0 0 0 1px #fff; } }
+    .pi { width: 18px; height: 18px; flex: none; }
+    .vposter { all: unset; box-sizing: border-box; position: relative; display: block; width: min(100%, 1040px); margin: 0 auto var(--space-7); cursor: pointer; border-radius: var(--radius-md); overflow: hidden;
+      aspect-ratio: 16 / 9; background: #121214; box-shadow: 0 0 0 1px rgb(255 255 255 / 0.12), 0 40px 80px -30px rgb(0 0 0 / 0.7); }
+    .vposter img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform var(--dur-3) var(--ease-out), opacity var(--dur-2) var(--ease-out); }
+    .vplay { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: inline-flex; align-items: center; gap: var(--space-3); height: 64px; padding: 0 var(--space-6);
+      background: var(--color-accent); color: #121214; font-family: var(--font-mono); font-size: var(--text-lead); font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; white-space: nowrap;
+      box-shadow: 0 20px 40px -12px rgb(0 0 0 / 0.6); transition: transform var(--dur-2) var(--ease-out), background-color var(--dur-2) var(--ease-out); }
+    .vplay .pi { width: 22px; height: 22px; }
+    @media (hover: hover) and (pointer: fine) { .vposter:hover img { transform: scale(1.02); opacity: .85; } .vposter:hover .vplay { background: #ff6c43; transform: translate(-50%, -50%) scale(1.04); } }
+    .vposter:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 4px; }
+    .vplayer { padding: 0; border: 0; background: transparent; max-width: none; max-height: none; width: min(1280px, 92vw); overflow: visible; }
+    .vplayer::backdrop { background: rgb(10 10 12 / 0.88); backdrop-filter: blur(6px); }
+    .vplayer[open] { animation: vp-in var(--dur-3) var(--ease-out) both; }
+    @keyframes vp-in { from { opacity: 0; transform: scale(0.97); } to { opacity: 1; transform: none; } }
+    .vbox { position: relative; aspect-ratio: 16 / 9; background: #000; border-radius: var(--radius-md); overflow: hidden; box-shadow: 0 40px 120px -20px rgb(0 0 0 / 0.8); }
+    .vbox video { display: block; width: 100%; height: 100%; }
+    .vclose { all: unset; position: absolute; top: calc(-1 * var(--space-7)); right: 0; width: 40px; height: 40px; display: grid; place-items: center; cursor: pointer; color: #fff; border-radius: 50%;
+      background: rgb(255 255 255 / 0.12); transition: background-color var(--dur-1) var(--ease-out); }
+    .vclose svg { width: 20px; height: 20px; }
+    .vclose:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+    @media (hover: hover) and (pointer: fine) { .vclose:hover { background: rgb(255 255 255 / 0.22); } }
+    @media (max-width: 720px) { .vposter { margin-bottom: var(--space-5); } .vplay { height: 52px; padding: 0 var(--space-4); font-size: var(--text-small); } .vplayer { width: 96vw; } .vclose { top: auto; bottom: calc(-1 * var(--space-7)); right: 50%; transform: translateX(50%); } }
+    @media (prefers-reduced-motion: reduce) { .vplayer[open] { animation: none; } .vposter img, .vplay { transition: none; } }
     .center-head { justify-content: center; }
     .head { display: flex; justify-content: space-between; align-items: flex-end; gap: var(--space-5); margin-bottom: var(--space-7); flex-wrap: wrap; }
     .head .note { margin: var(--space-4) 0 0; max-width: 34rem; color: rgb(238 238 240 / 0.72); font-size: var(--text-lead); font-weight: 500; line-height: 1.5; }
@@ -282,7 +309,7 @@ const ROLES = [
     <header class="nav">
       <div class="bar">
         <i class="sq" style="left:-2px;top:-2px"></i><i class="sq" style="right:-2px;top:-2px"></i><i class="sq" style="left:-2px;bottom:-2px"></i><i class="sq" style="right:-2px;bottom:-2px"></i>
-        <a class="brand" routerLink="/"><span class="logo"><svg width="100%" height="100%" viewBox="0 0 32 32" aria-hidden="true"><path d="M8 24V14a6 6 0 0 1 6-6h10" stroke="#121214" stroke-width="3.2" fill="none" stroke-linecap="round"/><path d="M14 24v-4a4 4 0 0 1 4-4h6" stroke="#121214" stroke-width="3.2" fill="none" stroke-linecap="round"/><circle cx="22.5" cy="22.5" r="2.6" fill="#f0512a"/></svg></span>Fieldwork</a>
+        <a class="brand" routerLink="/"><span class="logo"><svg width="100%" height="100%" viewBox="0 0 32 32" aria-hidden="true"><rect x="8" y="4.5" width="5" height="5" rx=".8" fill="#121214"/><rect x="14" y="4.5" width="5" height="5" rx=".8" fill="#121214"/><rect x="20" y="4.5" width="5" height="5" rx=".8" fill="#121214"/><rect x="8" y="10.5" width="5" height="5" rx=".8" fill="#121214"/><rect x="8" y="16.5" width="5" height="5" rx=".8" fill="#121214"/><rect x="8" y="22.5" width="5" height="5" rx=".8" fill="#121214"/><rect x="14" y="16.5" width="5" height="5" rx=".8" fill="#f0512a"/></svg></span>Fieldwork</a>
         <nav class="links" aria-label="Sections"><a href="#how">Product</a><a href="#watch">Tour</a><a href="#analytics">Analytics</a><a href="#access">Access</a></nav>
         <div class="acts">
           @if (session.token()) {
@@ -305,6 +332,7 @@ const ROLES = [
             <div class="ctas in" style="animation-delay: 160ms">
               <a class="pxb light lg" routerLink="/register"><span fwScramble="hover">Create a workspace</span></a>
               <a class="pxb lg" routerLink="/login" [queryParams]="{ demo: 1 }"><span fwScramble="hover">Explore the demo</span></a>
+              <button type="button" class="pxb lg see" (click)="openVideo()" aria-haspopup="dialog"><svg class="pi" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg><span fwScramble="hover">See it in 60 seconds</span></button>
             </div>
           </div>
           <div class="product in" style="animation-delay: 240ms">
@@ -377,9 +405,20 @@ const ROLES = [
             <div class="center"><p class="idx"><span>[</span>01<span>]</span><b fwScramble>Watch it work</b><em>+</em></p><h2 class="h2">Log. Approve. Invoice. Get paid.</h2>
             <p class="note">The same five steps every week, shown on the real product with a seeded studio.</p></div>
           </div>
+          <button type="button" class="vposter" (click)="openVideo()" aria-haspopup="dialog" aria-label="See it in 60 seconds: play the Fieldwork video">
+            <img src="/video/poster.jpg" alt="" width="1600" height="900" loading="lazy" decoding="async" />
+            <span class="vplay"><svg class="pi" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg>See it in 60 seconds</span>
+          </button>
           <fw-app-tour />
         </div>
       </section>
+
+      <dialog #vd class="vplayer" aria-label="See it in 60 seconds" (close)="closeVideo()" (click)="$event.target === vd ? vd.close() : null">
+        <div class="vbox">
+          <video #vv controls playsinline preload="none" poster="/video/poster.jpg" aria-label="Fieldwork in 60 seconds: time logged, approved, invoiced once and paid, on the real product"></video>
+          <button type="button" class="vclose" aria-label="Close video" (click)="vd.close()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+        </div>
+      </dialog>
 
       <fw-pixel-edge from="#121214" to="#f5f4f2" [seed]="14" />
 
@@ -528,6 +567,19 @@ const ROLES = [
 export class LandingPage {
   session = inject(Session);
   private howPin = viewChild<ElementRef<HTMLElement>>('howPin');
+  private vd = viewChild<ElementRef<HTMLDialogElement>>('vd');
+  private vv = viewChild<ElementRef<HTMLVideoElement>>('vv');
+
+  /** The 60-second video: nothing downloads until someone asks for it; then it plays with sound. */
+  openVideo(): void {
+    const dlg = this.vd()?.nativeElement, video = this.vv()?.nativeElement;
+    if (!dlg || !video) return;
+    if (!video.getAttribute('src')) video.src = '/video/fieldwork-60s.mp4';
+    dlg.showModal();
+    video.currentTime = 0;
+    video.play().catch(() => { /* the browser wants a second tap; the controls are there */ });
+  }
+  closeVideo(): void { this.vv()?.nativeElement.pause(); }
   /** How many record sheets have landed in the iso drawing, 1 to 5. */
   isoStep = signal(1);
 

@@ -284,7 +284,7 @@ const NEXT_PROJECT: Record<string, { to: string; label: string }[]> = {
     </div>
 
     @if (taskOpen()) {
-      <dialog fwModal #td class="modal side" aria-label="Task" (cancel)="$event.preventDefault(); closeTask()" (click)="$event.target === td && closeTask()">
+      <dialog fwModal #td class="modal side" aria-label="Task" (cancel)="$event.preventDefault(); closeTask()" (click)="$event.target === td ? closeTask() : null">
       <aside class="drawer">
         <div class="drawer-head">
           <div class="grow"><h2>{{ taskForm.id ? taskForm.title : 'New task' }}</h2>

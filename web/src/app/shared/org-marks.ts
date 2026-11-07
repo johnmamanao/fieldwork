@@ -27,5 +27,5 @@ export const ORG_MARKS: Record<string, OrgMark> = {
   // Energy: a bolt
   'kestrel-energy': { bg: '#0f766e', svg: `<path d="M18 5 9 18h6l-2 9 10-14h-6z" fill="${W}"/>` },
   // The studio's own work
-  'internal': { bg: '#121214', svg: `<path d="M8 24V14a6 6 0 0 1 6-6h10" stroke="${W}" stroke-width="3.2" fill="none" stroke-linecap="round"/><path d="M14 24v-4a4 4 0 0 1 4-4h6" stroke="${W}" stroke-width="3.2" fill="none" stroke-linecap="round"/><circle cx="22.5" cy="22.5" r="2.6" fill="#f0512a"/>` },
+  'internal': { bg: '#121214', svg: `<rect x="8" y="4.5" width="5" height="5" rx=".8" fill="${W}"/><rect x="14" y="4.5" width="5" height="5" rx=".8" fill="${W}"/><rect x="20" y="4.5" width="5" height="5" rx=".8" fill="${W}"/><rect x="8" y="10.5" width="5" height="5" rx=".8" fill="${W}"/><rect x="8" y="16.5" width="5" height="5" rx=".8" fill="${W}"/><rect x="8" y="22.5" width="5" height="5" rx=".8" fill="${W}"/><rect x="14" y="16.5" width="5" height="5" rx=".8" fill="#f0512a"/>` },
 };

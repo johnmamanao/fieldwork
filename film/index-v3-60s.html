@@ -1,0 +1,433 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fieldwork — punch cut</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Geist+Mono:wght@500;600&display=block" rel="stylesheet">
+<style>
+/* Fieldwork, punch cut. 60 s at 120 BPM: cuts on beats, type slams, real numbers as the heroes.
+   Every visual is a pure function of t (window.__seek). Real captures in media/. */
+:root{ --ink:#121214; --ink2:#1c1b1e; --verm:#f0512a; --verm-d:#b4351a; --coral:#ffcdbd; --light:#f5f4f2; }
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#000;overflow:hidden}
+body{font-family:Manrope,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+#stage{position:absolute;width:1920px;height:1080px;transform-origin:0 0;overflow:hidden;background:var(--ink);color:#fff}
+#cam{position:absolute;inset:0;will-change:transform}
+canvas.full{position:absolute;inset:0;width:1920px;height:1080px}
+.glow{position:absolute;inset:0;background:radial-gradient(60% 55% at 50% 45%, rgba(240,81,42,.28), transparent 70%);pointer-events:none}
+.layer{position:absolute;inset:0;display:none}
+.mono{font-family:"Geist Mono",monospace}
+
+/* type */
+#word{position:absolute;left:0;right:0;top:390px;text-align:center;font-size:260px;font-weight:800;letter-spacing:-.05em;line-height:1}
+.big{position:absolute;left:0;right:0;text-align:center;font-weight:800;letter-spacing:-.045em;line-height:1.02}
+.cap{position:absolute;left:0;right:0;top:930px;text-align:center;font-size:64px;font-weight:700;letter-spacing:-.03em;color:#fff}
+.cap b{color:var(--verm);font-weight:800}
+.ghost{position:absolute;left:0;right:0;text-align:center;font:600 340px "Geist Mono",monospace;letter-spacing:-.02em;color:transparent;-webkit-text-stroke:3px rgba(240,81,42,.35);top:250px}
+.num{position:absolute;font:600 150px "Geist Mono",monospace;letter-spacing:-.04em;color:#fff;text-shadow:0 20px 60px rgba(0,0,0,.6);white-space:nowrap}
+.num small{display:block;font:600 40px Manrope,sans-serif;letter-spacing:-.01em;color:var(--coral);margin-top:6px}
+.stamp{position:absolute;padding:12px 30px;border:8px solid var(--verm);color:var(--verm);font:600 104px "Geist Mono",monospace;letter-spacing:.04em;text-transform:uppercase;background:rgba(18,18,20,.82);white-space:nowrap}
+
+/* product windows, tilted in 3D and snapped flat on the beat */
+.persp{position:absolute;inset:0;perspective:1800px;perspective-origin:50% 45%}
+.win{position:absolute;left:760px;top:150px;width:1060px;height:660px;border-radius:20px;overflow:hidden;background:#fff;transform-style:preserve-3d;
+  box-shadow:0 0 0 1px rgba(255,255,255,.12),0 60px 140px -40px rgba(0,0,0,.8),0 0 120px -10px rgba(240,81,42,.35)}
+.win img{position:absolute;left:0;top:0;transform-origin:0 0;display:none}
+.ring{position:absolute;border-radius:12px;box-shadow:0 0 0 6px var(--verm),0 0 0 20px rgba(240,81,42,.25);opacity:0;pointer-events:none}
+.tile{position:absolute;width:640px;height:400px;border-radius:16px;overflow:hidden;background:#fff;box-shadow:0 40px 90px -30px rgba(0,0,0,.8)}
+.tile img{width:100%;height:100%;object-fit:cover;object-position:top left;display:block}
+.tl{position:absolute;left:18px;bottom:16px;padding:8px 16px;background:var(--ink);color:#fff;font:600 30px "Geist Mono",monospace;letter-spacing:.06em;text-transform:uppercase}
+
+/* skyline panel */
+#skyp{position:absolute;left:760px;top:120px;width:1060px;height:713px;border-radius:22px;overflow:hidden;background:#f3f3f4;box-shadow:0 60px 140px -40px rgba(0,0,0,.8),0 0 140px -10px rgba(240,81,42,.4)}
+#skyp img{position:absolute;inset:0;width:100%;height:100%;display:none}
+.stat{position:absolute;left:110px;font:600 112px "Geist Mono",monospace;letter-spacing:-.04em;color:#fff;white-space:nowrap}
+.stat small{display:block;font:600 36px Manrope,sans-serif;color:var(--coral);letter-spacing:-.01em;margin-top:4px}
+
+/* montage */
+#mont .frame{position:absolute;left:160px;top:90px;width:1600px;height:1000px;border-radius:22px;overflow:hidden;background:#fff;transform-origin:50% 40%}
+#mont .frame img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top left;display:none}
+#mont .lab{position:absolute;left:120px;bottom:120px;padding:18px 34px;background:var(--verm);color:var(--ink);font:800 120px Manrope,sans-serif;letter-spacing:-.04em;line-height:1}
+
+/* devices */
+#dev .desk{position:absolute;left:150px;top:150px;width:1240px;height:775px;border-radius:20px;overflow:hidden;background:#fff;box-shadow:0 60px 140px -40px rgba(0,0,0,.8)}
+#dev .desk img,#dev .ph img{width:100%;height:100%;object-fit:cover;object-position:top left;display:block}
+#dev .ph{position:absolute;left:1430px;top:120px;width:380px;height:822px;border-radius:44px;overflow:hidden;border:12px solid #2a292c;background:#fff;box-shadow:0 60px 140px -40px rgba(0,0,0,.9)}
+
+/* end card */
+#end .line{position:absolute;left:0;right:0;top:660px;text-align:center;font-size:54px;font-weight:600;letter-spacing:-.02em;color:#fff}
+#end .cta{position:absolute;left:50%;top:790px;height:92px;padding:0 48px;display:flex;align-items:center;background:var(--verm);color:var(--ink);font:600 38px "Geist Mono",monospace;letter-spacing:.08em;text-transform:uppercase;transform:translateX(-50%)}
+#end .cta::before,#end .cta::after{content:'';position:absolute;width:24px;height:34px;background:var(--verm)}
+#end .cta::before{left:-14px;bottom:14px} #end .cta::after{right:-14px;top:14px}
+
+#flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
+#hud{position:fixed;left:0;right:0;bottom:0;display:flex;gap:14px;align-items:center;padding:12px 18px;background:rgba(0,0,0,.6);color:#aaa;font:13px ui-monospace,Menlo,monospace;z-index:10}
+#hud input{flex:1} #hud button{background:#222;color:#ddd;border:0;border-radius:8px;padding:6px 12px;font:inherit;cursor:pointer}
+body.render #hud{display:none}
+</style>
+</head>
+<body>
+<div id="stage"><div id="cam">
+  <canvas id="bg" class="full" width="1920" height="1080"></canvas>
+  <div class="glow" id="glow"></div>
+
+  <section class="layer" id="sWords"><div id="word"></div></section>
+
+  <section class="layer" id="sTiles">
+    <div class="big" id="tilesT" style="top:80px;font-size:96px">Four tools. <span style="color:var(--verm)">Four truths.</span></div>
+    <div id="tiles"></div>
+    <div class="big" id="oneT" style="top:860px;font-size:150px;color:var(--verm)">One record.</div>
+  </section>
+
+  <section class="layer" id="sClaim"><div class="big" id="claimT" style="top:330px;font-size:150px"></div></section>
+
+  <section class="layer" id="sChain">
+    <div class="ghost" id="ghost"></div>
+    <div class="persp"><div class="win" id="win"><div class="ring" id="ring"></div><div class="ring" id="ring2"></div><div class="ring" id="ring3"></div></div></div>
+    <div class="num" id="num"></div>
+    <div class="stamp" id="stamp"></div>
+    <div class="cap" id="cap"></div>
+  </section>
+
+  <section class="layer" id="sSky">
+    <div id="skyp"></div>
+    <div class="stat" id="st0" style="top:250px">5,966 h<small>billable, last 26 weeks</small></div>
+    <div class="stat" id="st1" style="top:470px">59 h<small>busiest day · Jun 1</small></div>
+    <div class="stat" id="st2" style="top:690px">45 days<small>longest workday streak</small></div>
+    <div class="cap" id="skyCap" style="top:930px">Every hour, <b>on the record.</b></div>
+  </section>
+
+  <section class="layer" id="mont"><div class="frame" id="mframe"></div><div class="lab" id="mlab"></div></section>
+
+  <section class="layer" id="dev">
+    <div class="desk" id="desk"><img src="media/web/tour-overview.webp" alt=""></div>
+    <div class="ph" id="ph"><img src="media/web/phone.webp" alt=""></div>
+    <div class="cap" id="devCap">Built for desktop <b>and phone.</b></div>
+  </section>
+
+  <section class="layer" id="sOut"><div class="big" id="outT" style="top:360px;font-size:140px"></div></section>
+
+  <section class="layer" id="end"><canvas id="word2" class="full" width="1920" height="1080"></canvas>
+    <div class="line" id="endLine">Time, invoices and payments for studios.</div>
+    <div class="cta" id="cta">Open the demo studio</div></section>
+
+  <canvas id="pix" class="full" width="1920" height="1080"></canvas>
+  <div id="flash"></div>
+</div></div>
+<div id="hud"><button id="play">Pause</button><input id="scrub" type="range" min="0" step="0.01"><span id="time">0.00</span></div>
+<script>
+/* ---------- film contract ---------- */
+const FILM = {duration: 60, width: 1920, height: 1080, bpm: 120};
+const BEAT = 60 / FILM.bpm, BAR = 4 * BEAT;
+window.__film = FILM;
+
+/* ---------- helpers ---------- */
+const $ = id => document.getElementById(id);
+const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+const prog = (t, a, b) => clamp((t - a) / (b - a));
+const lerp = (a, b, p) => a + (b - a) * p;
+const E = {
+  out: p => 1 - (1 - p) ** 3, out5: p => 1 - (1 - p) ** 5,
+  inOut: p => p < .5 ? 4 * p ** 3 : 1 - (-2 * p + 2) ** 3 / 2,
+  back: p => { const c = 1.9; return 1 + (c + 1) * (p - 1) ** 3 + c * (p - 1) ** 2; },
+  in3: p => p ** 3,
+};
+function hash(x, y, s) { let h = (x * 374761393 + y * 668265263 + s * 2147483647) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967295; }
+const show = (id, on) => { $(id).style.display = on ? 'block' : 'none'; };
+// a slam: scale from big to 1 with a fast ease, fade in, and an optional hold-out
+function slam(el, t, at, {from = 1.35, dur = .16, out = 1e9, outDur = .12, y = 0} = {}) {
+  const p = E.out5(prog(t, at, at + dur)), o = prog(t, out, out + outDur);
+  el.style.opacity = p * (1 - o);
+  el.style.transform = `translateY(${y}px) scale(${lerp(from, 1, p) * (1 - .06 * o)})`;
+}
+const money = (c) => '$' + (c / 100).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+/* ---------- background: ink, or the hours grid ---------- */
+const BG = $('bg').getContext('2d');
+const LEVELS = ['#121214', '#3b140a', '#6e2210', '#982b15', '#b4351a', '#cf411d', '#e64d24', '#fb6a3d', '#ff9a78'];
+function drawGrid(t, clearW = .42, clearH = .3) {
+  const c = 40, gap = 7, sq = c - gap, cols = Math.ceil(1920 / c) + 1, rows = Math.ceil(1080 / c) + 1;
+  BG.fillStyle = '#b4351a'; BG.fillRect(0, 0, 1920, 1080);
+  const today = (t * 14) % (cols + 6) - 3;
+  for (let x = 0; x < cols; x++) {
+    const week = .55 + .45 * hash(Math.floor(x / 3), 0, 5);
+    for (let y = 0; y < rows; y++) {
+      const day = y % 7, rhythm = day >= 5 ? .12 : [.75, .9, 1, .92, .7][day];
+      const hours = Math.min(1, rhythm * week * (.55 + .6 * hash(x, y, 5)));
+      const u = (x * c + c / 2) / 1920, v = (y * c + c / 2) / 1080;
+      const calm = clamp(((((u - .5) / clearW) ** 2 + ((v - .48) / clearH) ** 2) - .55) / .9);
+      const near = Math.max(0, 1 - Math.abs(x - today) / 1.6);
+      const lvl = 4 + (hours * 4.4 - 1.4) * calm + near * 2.6 * calm + (x < today ? .35 : 0) * calm;
+      const i = Math.max(0, Math.min(8, Math.round(lvl)));
+      if (i === 4) continue;
+      BG.fillStyle = LEVELS[i]; BG.fillRect(x * c, y * c, sq, sq);
+    }
+  }
+}
+function drawInk() { BG.fillStyle = '#121214'; BG.fillRect(0, 0, 1920, 1080); }
+
+/* ---------- one pixel burst, into the end card ---------- */
+const PX = $('pix').getContext('2d');
+const BURSTS = [52.0];
+function drawPix(t) {
+  PX.clearRect(0, 0, 1920, 1080);
+  const b = BURSTS.find(x => t >= x - .22 && t < x + .3); if (b === undefined) return;
+  const c = 60, cols = 32, rows = 18;
+  for (let x = 0; x < cols; x++) for (let y = 0; y < rows; y++) {
+    const h = hash(x, y, Math.round(b * 10)), d = (x / cols) * .14 + h * .08;   // a sweep left to right with grain
+    const on = t >= b - .22 + d && t < b + .02 + d * 1.4;
+    if (!on) continue;
+    PX.fillStyle = h > .66 ? '#ff9a78' : h > .3 ? '#f0512a' : '#b4351a';
+    PX.fillRect(x * c, y * c, c - 4, c - 4);
+  }
+}
+
+/* ---------- camera shake on impacts: the drops and the two real locks ---------- */
+const SHAKES = [4.0, 20.5, 21.0, 21.5, 28.0, 52.0];
+function shake(t) {
+  let dx = 0, dy = 0, s = 1;
+  for (const h of SHAKES) { const k = t - h; if (k >= 0 && k < .35) { const a = (1 - k / .35) ** 2 * 18; dx += Math.sin(k * 90) * a; dy += Math.cos(k * 70) * a * .7; s += (1 - k / .35) ** 3 * .02; } }
+  $('cam').style.transform = `translate(${dx}px,${dy}px) scale(${s})`;
+}
+// a white frame on the biggest hits
+const FLASHES = [4.0, 28.0, 52.0];
+function flash(t) { let o = 0; for (const f of FLASHES) { const k = t - f; if (k >= 0 && k < .18) o = Math.max(o, (1 - k / .18) * .55); } $('flash').style.opacity = o; }
+
+/* ---------- A: four words, one per beat ---------- */
+const WORDS = [[0.0, 'HOURS', '#fff'], [0.5, 'APPROVALS', '#f0512a'], [1.0, 'INVOICES', '#fff'], [1.5, 'PAYMENTS', '#f0512a']];
+
+/* ---------- B/C: four tools collapse into one record ---------- */
+const TILES = [['tour-time', 'Hours', 120, 230, -8], ['tour-approve', 'Approvals', 1160, 200, 7], ['tour-invoice', 'Invoices', 160, 640, 6], ['tour-payments', 'Payments', 1120, 620, -6]];
+$('tiles').innerHTML = TILES.map((x, i) => `<div class="tile" id="tile${i}"><img src="media/web/${x[0]}.webp" alt=""><div class="tl">${x[1]}</div></div>`).join('');
+
+/* ---------- E–I: the chain, recorded live in the app ---------- */
+// Screen recordings of the running product (CDP screencast, every painted frame), one clip per step of one chain:
+// Leo starts a timer and submits his week, Avery approves it, invoices it, Leo's rows lock, the payment clears it.
+// map: [film t, clip t] pairs, piecewise linear, so a clip runs faster through waiting and lands on the result.
+// keys: the camera, [film t, {x, y, w}] in page px (the app at 1600x1000). nums: values the app showed in that clip.
+const REC = {"log":[[0,"00000"],[0.018,"00001"],[0.032,"00002"],[0.048,"00003"],[0.066,"00004"],[0.083,"00005"],[0.823,"00006"],[0.837,"00007"],[0.855,"00008"],[0.87,"00009"],[0.886,"00010"],[0.901,"00011"],[0.915,"00012"],[0.931,"00013"],[0.949,"00014"],[0.965,"00015"],[0.98,"00016"],[0.997,"00017"],[1.017,"00018"],[1.032,"00019"],[1.051,"00020"],[1.066,"00021"],[1.083,"00022"],[1.101,"00023"],[1.119,"00024"],[1.136,"00025"],[1.155,"00026"],[1.171,"00027"],[1.187,"00028"],[1.202,"00029"],[1.218,"00030"],[1.232,"00031"],[1.247,"00032"],[1.266,"00033"],[1.282,"00034"],[1.3,"00035"],[1.319,"00036"],[1.335,"00037"],[1.353,"00038"],[1.37,"00039"],[1.385,"00040"],[1.408,"00041"],[1.43,"00042"],[1.451,"00043"],[1.474,"00044"],[1.497,"00045"],[1.519,"00046"],[1.539,"00047"],[1.559,"00048"],[1.582,"00049"],[1.602,"00050"],[1.622,"00051"],[1.642,"00052"],[1.663,"00053"],[1.683,"00054"],[1.703,"00055"],[1.724,"00056"],[1.742,"00057"],[1.76,"00058"],[1.781,"00059"],[2.129,"00060"],[2.149,"00061"],[2.172,"00062"],[2.195,"00063"],[2.215,"00064"],[2.236,"00065"],[2.255,"00066"],[2.274,"00067"],[2.295,"00068"],[2.314,"00069"],[2.331,"00070"],[2.349,"00071"],[2.368,"00072"],[2.388,"00073"],[2.409,"00074"],[2.427,"00075"],[2.448,"00076"],[2.465,"00077"],[2.486,"00078"],[2.504,"00079"],[2.523,"00080"],[2.544,"00081"],[2.562,"00082"],[2.677,"00083"],[3.185,"00084"],[3.206,"00085"],[3.226,"00086"],[3.246,"00087"],[3.267,"00088"],[3.286,"00089"],[3.305,"00090"],[3.325,"00091"],[3.344,"00092"],[3.366,"00093"],[3.385,"00094"],[3.405,"00095"],[3.424,"00096"],[3.444,"00097"],[3.463,"00098"],[3.487,"00099"],[3.507,"00100"],[3.53,"00101"],[3.553,"00102"],[3.574,"00103"],[3.595,"00104"],[3.617,"00105"],[3.742,"00106"],[3.763,"00107"],[3.783,"00108"],[3.802,"00109"],[3.825,"00110"],[3.847,"00111"],[3.866,"00112"],[3.886,"00113"],[3.908,"00114"],[3.926,"00115"],[3.947,"00116"],[3.966,"00117"],[3.988,"00118"],[4.009,"00119"],[4.029,"00120"],[4.05,"00121"],[4.076,"00122"],[4.103,"00123"],[4.13,"00124"],[4.153,"00125"],[4.176,"00126"],[4.198,"00127"],[4.217,"00128"],[4.273,"00129"],[4.353,"00130"],[4.428,"00131"],[4.502,"00132"],[4.577,"00133"],[4.653,"00134"],[4.726,"00135"],[4.804,"00136"],[4.881,"00137"],[4.96,"00138"],[5.036,"00139"],[5.116,"00140"],[5.195,"00141"],[5.578,"00142"],[5.596,"00143"],[5.618,"00144"],[5.64,"00145"],[5.66,"00146"],[5.681,"00147"],[5.701,"00148"],[5.722,"00149"],[5.742,"00150"],[5.762,"00151"],[5.782,"00152"],[5.802,"00153"],[5.824,"00154"],[5.849,"00155"],[5.872,"00156"],[5.893,"00157"],[5.916,"00158"],[5.938,"00159"],[5.957,"00160"],[5.978,"00161"],[6.001,"00162"],[6.025,"00163"],[6.044,"00164"],[6.159,"00165"],[6.188,"00166"],[6.217,"00167"],[6.239,"00168"],[6.263,"00169"],[6.283,"00170"],[6.305,"00171"],[6.325,"00172"],[6.346,"00173"],[6.367,"00174"],[6.389,"00175"],[6.409,"00176"],[6.429,"00177"],[6.449,"00178"],[6.47,"00179"],[6.49,"00180"],[6.506,"00181"],[6.521,"00182"],[6.537,"00183"],[6.553,"00184"],[6.569,"00185"],[6.584,"00186"],[6.6,"00187"],[6.616,"00188"],[6.632,"00189"],[6.648,"00190"],[6.665,"00191"],[6.682,"00192"],[6.699,"00193"],[6.715,"00194"],[6.734,"00195"],[6.75,"00196"],[6.767,"00197"],[6.785,"00198"],[6.802,"00199"],[6.817,"00200"],[6.833,"00201"],[6.85,"00202"],[7.974,"00203"],[8.972,"00204"],[9.973,"00205"],[9.99,"00206"],[10.007,"00207"],[10.021,"00208"],[10.039,"00209"],[10.055,"00210"],[10.071,"00211"],[10.088,"00212"],[10.106,"00213"]],"submit":[[0,"00000"],[1.018,"00001"],[1.034,"00002"],[1.051,"00003"],[1.072,"00004"],[1.088,"00005"],[1.103,"00006"],[1.119,"00007"],[1.134,"00008"],[1.151,"00009"],[1.166,"00010"],[1.185,"00011"],[1.2,"00012"],[1.218,"00013"],[1.235,"00014"],[1.251,"00015"],[1.266,"00016"],[1.284,"00017"],[1.301,"00018"],[1.319,"00019"],[1.333,"00020"],[1.352,"00021"],[1.367,"00022"],[1.383,"00023"],[1.4,"00024"],[1.417,"00025"],[1.433,"00026"],[1.45,"00027"],[1.467,"00028"],[1.495,"00029"],[1.508,"00030"],[1.52,"00031"],[1.534,"00032"],[1.552,"00033"],[1.566,"00034"],[1.583,"00035"],[1.605,"00036"],[1.618,"00037"],[1.634,"00038"],[1.651,"00039"],[1.667,"00040"],[1.683,"00041"],[1.7,"00042"],[1.725,"00043"],[1.741,"00044"],[1.758,"00045"],[1.774,"00046"],[1.793,"00047"],[1.806,"00048"],[1.824,"00049"],[1.844,"00050"],[1.86,"00051"],[1.877,"00052"],[1.892,"00053"],[1.908,"00054"],[1.924,"00055"],[1.941,"00056"],[1.957,"00057"],[1.975,"00058"],[1.993,"00059"],[2.017,"00060"],[2.03,"00061"],[2.047,"00062"],[2.062,"00063"],[2.079,"00064"],[2.096,"00065"],[2.113,"00066"],[2.13,"00067"],[2.145,"00068"],[2.16,"00069"],[2.176,"00070"]],"approve":[[0,"00000"],[0.821,"00001"],[0.836,"00002"],[0.853,"00003"],[0.871,"00004"],[0.886,"00005"],[0.903,"00006"],[0.92,"00007"],[0.935,"00008"],[0.954,"00009"],[0.969,"00010"],[0.986,"00011"],[1.002,"00012"],[1.02,"00013"],[1.039,"00014"],[1.056,"00015"],[1.071,"00016"],[1.087,"00017"],[1.104,"00018"],[1.12,"00019"],[1.139,"00020"],[1.157,"00021"],[1.171,"00022"],[1.311,"00023"],[1.44,"00024"],[2.222,"00025"],[2.237,"00026"],[2.253,"00027"],[2.269,"00028"],[2.286,"00029"],[2.305,"00030"],[2.322,"00031"],[2.338,"00032"],[2.354,"00033"],[2.37,"00034"],[2.386,"00035"],[2.405,"00036"],[2.421,"00037"],[2.438,"00038"],[2.453,"00039"],[2.468,"00040"],[2.487,"00041"],[2.503,"00042"],[2.519,"00043"],[2.539,"00044"],[2.553,"00045"],[2.571,"00046"],[2.691,"00047"],[2.704,"00048"],[2.72,"00049"],[2.736,"00050"],[2.756,"00051"],[2.772,"00052"],[2.789,"00053"],[2.815,"00054"],[2.831,"00055"],[2.848,"00056"],[2.863,"00057"],[2.88,"00058"],[2.896,"00059"],[2.913,"00060"],[2.929,"00061"],[2.943,"00062"],[2.959,"00063"],[2.973,"00064"],[2.99,"00065"],[3.006,"00066"],[3.022,"00067"],[3.037,"00068"],[3.056,"00069"],[3.073,"00070"],[3.089,"00071"],[3.105,"00072"],[3.124,"00073"],[3.577,"00074"],[3.595,"00075"],[3.613,"00076"],[3.631,"00077"],[3.651,"00078"],[3.671,"00079"],[3.692,"00080"],[3.713,"00081"],[3.732,"00082"],[3.751,"00083"],[3.771,"00084"],[3.79,"00085"],[3.813,"00086"],[3.833,"00087"],[3.853,"00088"],[3.874,"00089"],[3.896,"00090"],[3.917,"00091"],[3.938,"00092"],[3.958,"00093"],[3.976,"00094"],[3.996,"00095"],[4.017,"00096"],[4.034,"00097"],[4.051,"00098"],[4.069,"00099"],[4.085,"00100"],[4.102,"00101"],[4.118,"00102"],[4.135,"00103"],[4.153,"00104"],[4.168,"00105"],[4.185,"00106"],[4.202,"00107"],[4.218,"00108"],[4.238,"00109"],[4.253,"00110"],[4.27,"00111"],[4.287,"00112"],[4.304,"00113"],[4.323,"00114"],[4.338,"00115"],[4.355,"00116"],[4.37,"00117"],[4.388,"00118"],[4.402,"00119"],[4.418,"00120"],[4.433,"00121"],[4.45,"00122"],[4.466,"00123"],[4.483,"00124"],[4.499,"00125"],[4.514,"00126"],[4.53,"00127"],[4.547,"00128"],[4.563,"00129"],[4.58,"00130"],[4.705,"00131"],[4.721,"00132"],[4.736,"00133"],[4.753,"00134"],[4.773,"00135"],[4.79,"00136"],[4.807,"00137"],[4.827,"00138"],[4.841,"00139"],[4.855,"00140"],[4.87,"00141"],[4.887,"00142"],[4.903,"00143"],[4.923,"00144"],[4.937,"00145"],[4.953,"00146"],[4.971,"00147"],[4.987,"00148"],[5.002,"00149"],[5.021,"00150"]],"invoice":[[0,"00000"],[0.841,"00001"],[0.858,"00002"],[0.877,"00003"],[0.893,"00004"],[0.913,"00005"],[0.927,"00006"],[0.943,"00007"],[0.96,"00008"],[0.977,"00009"],[0.993,"00010"],[1.011,"00011"],[1.029,"00012"],[1.044,"00013"],[1.058,"00014"],[1.078,"00015"],[1.095,"00016"],[1.11,"00017"],[1.126,"00018"],[1.148,"00019"],[1.166,"00020"],[1.187,"00021"],[1.209,"00022"],[1.223,"00023"],[1.24,"00024"],[1.255,"00025"],[1.271,"00026"],[1.29,"00027"],[1.307,"00028"],[1.321,"00029"],[1.336,"00030"],[1.352,"00031"],[1.368,"00032"],[1.385,"00033"],[1.404,"00034"],[1.42,"00035"],[1.45,"00036"],[1.464,"00037"],[1.481,"00038"],[1.498,"00039"],[1.515,"00040"],[1.534,"00041"],[1.551,"00042"],[1.572,"00043"],[1.593,"00044"],[1.609,"00045"],[1.626,"00046"],[1.643,"00047"],[1.658,"00048"],[1.674,"00049"],[1.691,"00050"],[1.71,"00051"],[1.726,"00052"],[1.741,"00053"],[1.756,"00054"],[1.771,"00055"],[1.786,"00056"],[1.804,"00057"],[2.203,"00058"],[2.222,"00059"],[2.239,"00060"],[2.256,"00061"],[2.274,"00062"],[2.291,"00063"],[2.308,"00064"],[2.325,"00065"],[2.343,"00066"],[2.359,"00067"],[2.377,"00068"],[2.395,"00069"],[2.414,"00070"],[2.432,"00071"],[2.449,"00072"],[2.467,"00073"],[2.487,"00074"],[2.511,"00075"],[2.531,"00076"],[2.552,"00077"],[2.571,"00078"],[2.591,"00079"],[2.717,"00080"],[3.218,"00081"],[3.238,"00082"],[3.255,"00083"],[3.272,"00084"],[3.287,"00085"],[3.304,"00086"],[3.321,"00087"],[3.338,"00088"],[3.355,"00089"],[3.372,"00090"],[3.389,"00091"],[3.407,"00092"],[3.423,"00093"],[3.441,"00094"],[3.457,"00095"],[3.476,"00096"],[3.494,"00097"],[3.509,"00098"],[3.523,"00099"],[3.538,"00100"],[3.554,"00101"],[3.569,"00102"],[3.686,"00103"],[4.208,"00104"],[4.224,"00105"],[4.241,"00106"],[4.257,"00107"],[4.273,"00108"],[4.291,"00109"],[4.307,"00110"],[4.325,"00111"],[4.342,"00112"],[4.36,"00113"],[4.378,"00114"],[4.397,"00115"],[4.414,"00116"],[4.431,"00117"],[4.446,"00118"],[4.464,"00119"],[4.479,"00120"],[4.495,"00121"],[4.51,"00122"],[4.526,"00123"],[4.541,"00124"],[4.557,"00125"],[4.572,"00126"],[4.587,"00127"],[4.605,"00128"],[4.693,"00129"],[4.713,"00130"],[4.738,"00131"],[4.758,"00132"],[4.777,"00133"],[4.795,"00134"],[4.815,"00135"],[4.833,"00136"],[4.849,"00137"],[4.866,"00138"],[4.885,"00139"],[4.903,"00140"],[4.92,"00141"],[4.938,"00142"],[4.954,"00143"],[4.972,"00144"],[4.989,"00145"],[5.011,"00146"],[5.031,"00147"],[5.052,"00148"],[5.071,"00149"],[5.093,"00150"],[5.112,"00151"],[5.132,"00152"],[5.15,"00153"],[5.22,"00154"],[5.283,"00155"],[5.371,"00156"],[5.421,"00157"],[5.465,"00158"],[5.506,"00159"],[5.559,"00160"],[5.602,"00161"],[5.65,"00162"],[5.67,"00163"],[6.617,"00164"],[6.638,"00165"],[6.652,"00166"],[6.669,"00167"],[6.685,"00168"],[6.703,"00169"],[6.718,"00170"],[6.738,"00171"],[6.754,"00172"],[6.768,"00173"],[6.785,"00174"],[6.802,"00175"],[6.818,"00176"],[6.835,"00177"],[6.852,"00178"],[6.867,"00179"],[6.885,"00180"],[6.901,"00181"],[6.918,"00182"],[6.938,"00183"],[6.952,"00184"],[6.969,"00185"],[6.986,"00186"],[7.006,"00187"],[7.02,"00188"],[7.038,"00189"],[7.053,"00190"],[7.067,"00191"],[7.085,"00192"],[7.104,"00193"],[7.118,"00194"],[7.135,"00195"],[7.151,"00196"],[7.169,"00197"],[7.185,"00198"],[7.203,"00199"],[7.219,"00200"],[7.236,"00201"],[7.252,"00202"],[7.269,"00203"],[7.284,"00204"],[7.301,"00205"],[7.325,"00206"],[7.343,"00207"],[7.372,"00208"],[7.402,"00209"],[7.427,"00210"],[7.453,"00211"],[7.477,"00212"],[7.503,"00213"],[7.53,"00214"],[7.556,"00215"],[7.576,"00216"],[7.603,"00217"],[8.363,"00218"],[8.379,"00219"],[8.396,"00220"],[8.416,"00221"],[8.432,"00222"],[8.455,"00223"],[8.473,"00224"],[8.49,"00225"],[8.507,"00226"],[8.522,"00227"],[8.539,"00228"],[8.557,"00229"],[8.575,"00230"],[8.593,"00231"],[8.61,"00232"],[8.627,"00233"],[8.643,"00234"],[8.661,"00235"],[8.678,"00236"],[8.695,"00237"],[8.712,"00238"],[8.732,"00239"],[8.748,"00240"],[8.764,"00241"],[8.782,"00242"],[8.799,"00243"],[8.821,"00244"],[8.837,"00245"],[8.856,"00246"],[8.875,"00247"],[8.892,"00248"],[8.911,"00249"],[8.931,"00250"],[8.952,"00251"],[8.975,"00252"],[8.996,"00253"],[9.014,"00254"],[9.032,"00255"],[9.049,"00256"],[9.068,"00257"],[9.086,"00258"],[9.103,"00259"],[9.12,"00260"],[9.139,"00261"],[9.156,"00262"],[9.172,"00263"],[9.188,"00264"],[9.203,"00265"],[9.222,"00266"],[9.236,"00267"],[9.255,"00268"],[9.271,"00269"],[9.286,"00270"],[9.303,"00271"],[9.319,"00272"],[9.833,"00273"],[9.853,"00274"],[9.874,"00275"],[9.893,"00276"],[9.913,"00277"],[9.932,"00278"],[9.953,"00279"],[9.972,"00280"],[9.991,"00281"],[10.007,"00282"],[10.023,"00283"],[10.042,"00284"],[10.057,"00285"],[10.073,"00286"],[10.091,"00287"],[10.107,"00288"],[10.122,"00289"],[10.139,"00290"],[10.154,"00291"],[10.172,"00292"],[10.187,"00293"],[10.202,"00294"],[10.219,"00295"],[10.235,"00296"],[10.252,"00297"],[10.27,"00298"],[10.285,"00299"],[10.305,"00300"],[10.322,"00301"],[10.34,"00302"],[10.359,"00303"],[10.376,"00304"],[10.393,"00305"],[10.414,"00306"],[10.432,"00307"],[10.45,"00308"],[10.468,"00309"],[10.488,"00310"],[10.506,"00311"],[10.525,"00312"],[10.544,"00313"],[10.565,"00314"],[10.587,"00315"],[10.608,"00316"],[10.63,"00317"],[10.651,"00318"],[10.671,"00319"],[10.689,"00320"],[10.707,"00321"],[10.726,"00322"],[10.747,"00323"],[10.768,"00324"],[10.789,"00325"],[10.811,"00326"],[10.824,"00327"],[10.839,"00328"],[10.854,"00329"],[10.869,"00330"],[10.886,"00331"],[10.903,"00332"],[10.919,"00333"],[10.936,"00334"],[10.954,"00335"],[10.969,"00336"],[10.985,"00337"],[11.002,"00338"],[11.018,"00339"],[11.036,"00340"],[11.051,"00341"],[11.07,"00342"],[11.087,"00343"],[11.104,"00344"],[11.119,"00345"],[11.136,"00346"],[11.153,"00347"],[11.17,"00348"],[11.186,"00349"],[11.206,"00350"],[11.224,"00351"],[11.24,"00352"],[11.26,"00353"],[11.278,"00354"],[11.293,"00355"],[11.312,"00356"],[11.329,"00357"],[11.347,"00358"],[11.365,"00359"],[11.381,"00360"],[11.398,"00361"],[11.414,"00362"],[12.183,"00363"],[12.197,"00364"],[12.211,"00365"],[12.227,"00366"],[12.243,"00367"],[12.258,"00368"],[12.274,"00369"],[12.29,"00370"],[12.306,"00371"],[12.322,"00372"],[12.337,"00373"],[12.355,"00374"],[12.372,"00375"],[12.39,"00376"],[12.406,"00377"],[12.423,"00378"],[12.439,"00379"],[12.457,"00380"],[12.475,"00381"],[12.494,"00382"],[12.514,"00383"],[12.534,"00384"],[12.554,"00385"],[12.574,"00386"],[12.591,"00387"],[12.611,"00388"],[12.631,"00389"],[12.649,"00390"],[12.669,"00391"],[12.689,"00392"],[12.706,"00393"],[12.723,"00394"],[12.742,"00395"],[12.772,"00396"],[12.792,"00397"],[12.811,"00398"],[12.831,"00399"],[12.849,"00400"],[12.865,"00401"],[12.884,"00402"],[12.9,"00403"],[12.916,"00404"],[12.932,"00405"],[12.948,"00406"],[12.965,"00407"],[12.983,"00408"],[12.998,"00409"],[13.012,"00410"],[13.027,"00411"],[13.043,"00412"],[13.057,"00413"],[13.071,"00414"],[13.086,"00415"],[13.101,"00416"],[13.118,"00417"],[13.72,"00418"],[13.741,"00419"],[13.757,"00420"],[13.773,"00421"],[13.794,"00422"],[13.815,"00423"],[13.83,"00424"],[13.845,"00425"],[13.863,"00426"],[13.878,"00427"],[13.893,"00428"],[13.91,"00429"],[13.927,"00430"],[13.943,"00431"],[13.959,"00432"],[13.976,"00433"],[13.993,"00434"],[14.011,"00435"],[14.027,"00436"],[14.043,"00437"],[14.059,"00438"],[14.075,"00439"],[14.09,"00440"],[14.105,"00441"],[14.122,"00442"],[14.137,"00443"],[14.154,"00444"],[14.171,"00445"],[14.191,"00446"],[14.209,"00447"],[14.224,"00448"],[14.24,"00449"],[14.255,"00450"],[14.271,"00451"],[14.287,"00452"],[14.307,"00453"],[14.325,"00454"],[14.343,"00455"],[14.362,"00456"],[14.379,"00457"],[14.395,"00458"],[14.411,"00459"],[14.43,"00460"],[14.449,"00461"],[14.466,"00462"],[14.483,"00463"],[14.502,"00464"],[14.518,"00465"],[14.537,"00466"],[14.555,"00467"],[14.571,"00468"],[14.587,"00469"],[14.606,"00470"],[14.624,"00471"],[14.638,"00472"],[14.652,"00473"],[14.668,"00474"],[14.685,"00475"],[14.702,"00476"],[14.718,"00477"],[14.735,"00478"],[14.754,"00479"],[14.77,"00480"],[14.787,"00481"],[14.805,"00482"],[14.828,"00483"],[14.846,"00484"],[14.866,"00485"],[14.883,"00486"],[14.899,"00487"],[14.915,"00488"],[14.932,"00489"],[14.948,"00490"],[14.964,"00491"]],"pay":[[0,"00000"],[0.811,"00001"],[0.828,"00002"],[0.848,"00003"],[0.868,"00004"],[0.886,"00005"],[0.901,"00006"],[0.916,"00007"],[0.931,"00008"],[0.946,"00009"],[0.962,"00010"],[0.977,"00011"],[0.995,"00012"],[1.014,"00013"],[1.029,"00014"],[1.045,"00015"],[1.061,"00016"],[1.079,"00017"],[1.094,"00018"],[1.111,"00019"],[1.128,"00020"],[1.144,"00021"],[1.161,"00022"],[1.178,"00023"],[1.197,"00024"],[1.213,"00025"],[1.227,"00026"],[1.244,"00027"],[1.26,"00028"],[1.278,"00029"],[1.297,"00030"],[1.312,"00031"],[1.326,"00032"],[1.344,"00033"],[1.362,"00034"],[1.378,"00035"],[1.397,"00036"],[1.451,"00037"],[1.559,"00038"],[1.637,"00039"],[1.696,"00040"],[1.755,"00041"],[1.804,"00042"],[1.848,"00043"],[1.893,"00044"],[1.942,"00045"],[1.986,"00046"],[2.008,"00047"],[2.022,"00048"],[2.967,"00049"],[2.984,"00050"],[3.001,"00051"],[3.018,"00052"],[3.034,"00053"],[3.053,"00054"],[3.069,"00055"],[3.085,"00056"],[3.102,"00057"],[3.118,"00058"],[3.133,"00059"],[3.149,"00060"],[3.164,"00061"],[3.18,"00062"],[3.196,"00063"],[3.212,"00064"],[3.229,"00065"],[3.247,"00066"],[3.263,"00067"],[3.28,"00068"],[3.296,"00069"],[3.313,"00070"],[3.33,"00071"],[3.347,"00072"],[3.366,"00073"],[3.381,"00074"],[3.397,"00075"],[3.413,"00076"],[3.43,"00077"],[3.45,"00078"],[3.467,"00079"],[3.487,"00080"],[3.504,"00081"],[3.524,"00082"],[3.549,"00083"],[3.568,"00084"],[3.59,"00085"],[3.609,"00086"],[3.628,"00087"],[3.645,"00088"],[3.663,"00089"],[3.682,"00090"],[3.7,"00091"],[3.72,"00092"],[3.738,"00093"],[3.759,"00094"],[3.778,"00095"],[3.794,"00096"],[3.813,"00097"],[3.829,"00098"],[3.846,"00099"],[3.865,"00100"],[3.889,"00101"],[3.908,"00102"],[3.926,"00103"],[3.942,"00104"],[3.957,"00105"],[3.971,"00106"],[3.985,"00107"],[4,"00108"],[4.014,"00109"],[4.029,"00110"],[4.043,"00111"],[4.059,"00112"],[4.077,"00113"],[4.092,"00114"],[4.112,"00115"],[4.127,"00116"],[4.145,"00117"],[5.229,"00118"],[5.435,"00119"],[5.454,"00120"],[5.47,"00121"],[5.534,"00122"],[5.655,"00123"],[5.68,"00124"],[6.261,"00125"]],"lock":[[0,"00000"],[0.903,"00001"],[0.916,"00002"],[2.122,"00003"],[2.135,"00004"],[2.15,"00005"],[2.167,"00006"],[2.183,"00007"],[2.2,"00008"],[2.221,"00009"],[2.236,"00010"],[2.254,"00011"],[2.271,"00012"],[2.289,"00013"],[2.308,"00014"],[2.326,"00015"],[2.346,"00016"],[2.367,"00017"],[2.388,"00018"],[2.405,"00019"],[2.422,"00020"],[2.441,"00021"],[2.459,"00022"],[2.479,"00023"],[2.498,"00024"]]};
+const CHAIN = [
+  {a: 8, b: 10.8, clip: 'log', map: [[8, 1.1], [9.0, 2.9], [10.0, 6.5], [10.8, 8.3]],
+   keys: [[8, {x: 900, y: 0, w: 700}], [10.8, {x: 920, y: 0, w: 680}]],
+   nums: [{at: 8.3, text: 'HAL-02', sub: 'Winter campaign microsite'}, {at: 10.0, text: 'Running', sub: 'the timer stays in the top bar'}],
+   cap: 'Start the clock <b>from any page.</b>'},
+  {a: 10.8, b: 12, clip: 'submit', map: [[10.8, 0.7], [12, 2.2]],
+   keys: [[10.8, {x: 560, y: 120, w: 1040}], [12, {x: 620, y: 140, w: 980}]],
+   nums: [{at: 11.2, text: '12', sub: 'entries submitted · Nov 2 – 8'}],
+   cap: 'Submit the week.'},
+  {a: 12, b: 15, clip: 'approve', map: [[12, 1.2], [13.4, 3.0], [14.2, 4.3], [15, 5.0]],
+   keys: [[12, {x: 260, y: 80, w: 1000}], [12.3, {x: 260, y: 80, w: 1000}], [14.4, {x: 600, y: 80, w: 1000}], [14.6, {x: 960, y: 640, w: 640}], [15, {x: 960, y: 640, w: 640}]],
+   nums: [{at: 12.4, text: '26', sub: 'entries · 65:30 h waiting'}, {at: 14.4, text: 'Approved', sub: '26 entries in one click'}],
+   cap: 'Approve it <b>in one click.</b>'},
+  {a: 15, b: 20, clip: 'invoice', map: [[15, 0.8], [15.9, 4.2], [16.3, 5.0], [16.6, 6.4], [17.0, 7.4], [17.6, 9.2], [17.9, 10.4], [17.95, 11.7], [18.4, 11.95], [18.9, 12.9], [19.3, 14.5], [20, 14.96]],
+   keys: [[15, {x: 200, y: 80, w: 1200}], [17.95, {x: 200, y: 80, w: 1200}], [18.15, {x: 300, y: 200, w: 900}], [18.85, {x: 300, y: 200, w: 900}], [19.0, {x: 200, y: 80, w: 1200}], [19.3, {x: 200, y: 80, w: 1200}], [19.45, {x: 280, y: 50, w: 760}], [20, {x: 290, y: 54, w: 740}]],
+   nums: [{at: 17.9, text: '9', sub: 'approved entries · 13.5 h'}, {at: 18.4, text: '$2,025.00', sub: 'one line on one invoice'}, {at: 19.4, text: 'LK-0029', sub: 'issued · Halden Outdoor Co.'}],
+   cap: 'Approved time becomes <b>one invoice.</b>'},
+  {a: 20, b: 24, clip: 'lock', map: [[20, 2.5], [24, 2.5]],
+   keys: [[20, {x: 760, y: 380, w: 700}], [24, {x: 780, y: 392, w: 660}]],
+   nums: [{at: 20.5, text: 'Invoiced', sub: 'Leo’s rows, locked to LK-0029'}],
+   rings: [{r: {x: 1345, y: 427, w: 90, h: 26}, at: 20.5}, {r: {x: 1345, y: 582, w: 90, h: 26}, at: 21.0}, {r: {x: 1345, y: 737, w: 90, h: 26}, at: 21.5}],
+   cap: 'Billed once. <b>Never twice.</b>'},
+  {a: 24, b: 28, clip: 'pay', map: [[24, 0.6], [24.8, 2.4], [25.3, 3.9], [25.75, 5.2], [25.8, 5.95], [28, 6.26]],
+   keys: [[24, {x: 160, y: 40, w: 1300}], [24.6, {x: 200, y: 80, w: 1200}], [25.8, {x: 200, y: 80, w: 1200}], [25.81, {x: 880, y: 120, w: 620}], [28, {x: 890, y: 124, w: 600}]],
+   nums: [{at: 24.9, text: '$2,025.00', sub: 'bank transfer, settled'}, {at: 26.0, text: '$0.00', sub: 'LK-0029 · amount due'}],
+   cap: 'A settled payment <b>closes an invoice.</b>'},
+];
+const recImg = new Image(); recImg.alt = ''; recImg.style.display = 'block'; $('win').insertBefore(recImg, $('ring'));
+let recSrc = '';
+function recFrame(clip, ct) { const fr = REC[clip]; let lo = 0, hi = fr.length - 1;
+  while (lo < hi) { const m = (lo + hi + 1) >> 1; if (fr[m][0] <= ct) lo = m; else hi = m - 1; } return `media/rec/${clip}/${fr[lo][1]}.jpg`; }
+function mapT(map, t) { if (t <= map[0][0]) return map[0][1];
+  for (let k = 1; k < map.length; k++) if (t <= map[k][0]) { const [t0, c0] = map[k - 1], [t1, c1] = map[k]; return c0 + (c1 - c0) * (t - t0) / (t1 - t0); }
+  return map[map.length - 1][1]; }
+const WIN_W = 1060;
+function frameCrop(img, crop) { const s = WIN_W / crop.w; img.style.width = 1600 * s + 'px'; img.style.transform = `translate(${-crop.x * s}px, ${-crop.y * s}px)`; return s; }
+function camAt(keys, t) {
+  if (t <= keys[0][0]) return keys[0][1];
+  for (let k = 1; k < keys.length; k++) { const [t1, c1] = keys[k], [t0, c0] = keys[k - 1];
+    if (t <= t1) { const p = E.inOut(prog(t, t0, t1)); return {x: lerp(c0.x, c1.x, p), y: lerp(c0.y, c1.y, p), w: lerp(c0.w, c1.w, p)}; } }
+  return keys[keys.length - 1][1];
+}
+function placeRing(el, r, crop, s, t, at) {
+  const p = E.out5(prog(t, at, at + .2)), pulse = 1 + .12 * Math.max(0, 1 - (t - at) / .3) * (t >= at ? 1 : 0);
+  el.style.opacity = p;
+  Object.assign(el.style, {left: (r.x - crop.x) * s - 8 + 'px', top: (r.y - crop.y) * s - 8 + 'px', width: r.w * s + 16 + 'px', height: r.h * s + 16 + 'px', transform: `scale(${pulse})`});
+}
+let lastChain = -1;
+function renderChain(t) {
+  const i = CHAIN.findIndex(c => t >= c.a && t < c.b), c = CHAIN[i];
+  if (i !== lastChain) { lastChain = i; $('cap').innerHTML = c.cap; }
+  const src = recFrame(c.clip, mapT(c.map, t));
+  if (src !== recSrc) { recSrc = src; recImg.src = src; }
+  // the first step flies in; after that the window stays put and the recordings cut on the beat
+  const fly = i === 0 ? prog(t, c.a, c.a + .4) : 1, flat = E.back(fly);
+  const crop = camAt(c.keys, t), s = frameCrop(recImg, crop);
+  const leave = i === CHAIN.length - 1 ? E.in3(prog(t, c.b - .16, c.b)) : 0;
+  const kick = i ? Math.max(0, 1 - (t - c.a) / .18) : 0;   // a small push on each cut
+  $('win').style.transform = `translateX(${(1 - flat) * 900 + leave * -500}px) rotateY(${(1 - flat) * -38 + leave * 20}deg) rotateX(${(1 - flat) * 10}deg) scale(${lerp(.82, 1, clamp(flat)) * (1 + kick * .025)})`;
+  $('win').style.opacity = clamp(fly * 3) * (1 - leave);
+  $('ghost').style.opacity = 0;
+  const rings = c.rings ?? [];
+  ['ring', 'ring2', 'ring3'].forEach((id, k) => { const r = rings[k]; if (r) placeRing($(id), r.r, crop, s, t, r.at); else $(id).style.opacity = 0; });
+  const n = [...c.nums].reverse().find(x => t >= x.at), num = $('num');
+  if (n) {
+    num.innerHTML = `${n.text}<small>${n.sub}</small>`;
+    num.style.fontSize = n.text.length > 8 ? '96px' : n.text.length > 6 ? '112px' : '140px';
+    Object.assign(num.style, {left: '96px', top: '330px'});
+    slam(num, t, n.at, {from: 1.45, dur: .16, out: c.b - .12});
+  } else num.style.opacity = 0;
+  $('stamp').style.opacity = 0;
+  const cp = i === 0 ? E.out5(prog(t, c.a + .3, c.a + .6)) : 1;
+  const co = i === CHAIN.length - 1 ? 1 - prog(t, c.b - .2, c.b) : 1;
+  $('cap').style.opacity = cp * co; $('cap').style.transform = `translateY(${(1 - cp) * 30}px)`;
+}
+function recReady() { return recImg.complete && recImg.naturalWidth ? Promise.resolve() : recImg.decode().catch(() => {}); }
+
+/* ---------- J: the real skyline rising (66 recorded frames) ---------- */
+const SKY = [];
+for (let i = 0; i < 66; i++) { const im = new Image(); im.src = `media/sky/${String(i).padStart(4, '0')}.jpg`; im.alt = ''; $('skyp').appendChild(im); SKY.push(im); }
+let lastSky = -1;
+function renderSky(t) {
+  const f = Math.max(0, Math.min(65, Math.floor((t - 28.25) * 30)));
+  if (f !== lastSky) { if (SKY[lastSky]) SKY[lastSky].style.display = 'none'; SKY[f].style.display = 'block'; lastSky = f; }
+  const p = E.back(prog(t, 28.0, 28.45)), push = E.inOut(prog(t, 28.5, 34));
+  $('skyp').style.transform = `perspective(1800px) rotateY(${(1 - clamp(p)) * -30}deg) translateX(${(1 - p) * 600}px) scale(${lerp(1, 1.06, push)})`;
+  $('skyp').style.opacity = clamp(prog(t, 28, 28.15));
+  [31.0, 31.5, 32.0].forEach((at, k) => slam($('st' + k), t, at, {from: 1.5, dur: .16}));
+  const cp = E.out5(prog(t, 29.0, 29.4)); $('skyCap').style.opacity = cp;
+}
+
+/* ---------- K: montage, one real screen per beat ---------- */
+const MONT = [['shot-projects', 'Projects'], ['shot-projects', 'Projects'], ['shot-clients', 'Clients'], ['shot-clients', 'Clients'], ['shot-invoices', 'Invoices'], ['shot-invoices', 'Invoices'],
+  ['shot-reports', 'Reports'], ['shot-reports', 'Reports'], ['shot-staff', 'Staff'], ['shot-staff', 'Staff'], ['shot-analytics', 'Analytics'], ['shot-analytics', 'Analytics'],
+  ['tour-overview', 'Overview'], ['tour-overview', 'Overview'], ['tour-time', 'Time'], ['tour-payments', 'Payments']];
+const MIM = {};
+for (const n of new Set(MONT.map(m => m[0]))) { const im = new Image(); im.src = `media/web/${n}.webp`; im.alt = ''; $('mframe').appendChild(im); MIM[n] = im; }
+let lastM = -1;
+function renderMont(t) {
+  const k = Math.max(0, Math.min(MONT.length - 1, Math.floor((t - 34) / BEAT)));
+  if (k !== lastM) { Object.values(MIM).forEach(im => im.style.display = 'none'); MIM[MONT[k][0]].style.display = 'block'; $('mlab').textContent = MONT[k][1]; lastM = k; }
+  const bt = t - (34 + k * BEAT), p = E.out5(clamp(bt / .2));
+  const sameAsPrev = k > 0 && MONT[k - 1][0] === MONT[k][0];
+  $('mframe').style.transform = `scale(${sameAsPrev ? lerp(1.0, 1.035, clamp(bt / BEAT)) : lerp(1.09, 1.0, p)}) rotate(${sameAsPrev ? 0 : (k % 2 ? .6 : -.6) * (1 - p)}deg)`;
+  const lp = sameAsPrev ? 1 : E.out5(clamp(bt / .16));
+  $('mlab').style.opacity = lp; $('mlab').style.transform = `translateX(${(1 - lp) * -60}px)`;
+}
+
+/* ---------- L: devices ---------- */
+function renderDev(t) {
+  const d = E.back(prog(t, 42.0, 42.45)), ph = E.back(prog(t, 42.9, 43.35));
+  $('desk').style.transform = `perspective(1800px) rotateY(${(1 - clamp(d)) * 25}deg) translateX(${(1 - d) * -500}px)`; $('desk').style.opacity = clamp(prog(t, 42, 42.15));
+  $('ph').style.transform = `translateY(${(1 - ph) * 700}px) rotate(${(1 - clamp(ph)) * 8}deg)`;
+  const cp = E.out5(prog(t, 43.4, 43.8)); $('devCap').style.opacity = cp;
+}
+
+/* ---------- end: the ASCII wordmark, bright ---------- */
+const W2 = $('word2').getContext('2d'), RAMP = ' .:-=+*#%';
+let WORD = null;
+function sampleWord() {
+  const cw = 13, ch = cw * 1.6, cols = Math.floor(1920 / cw), rows = Math.floor(340 / ch), top0 = 250;
+  const off = document.createElement('canvas'); off.width = cols; off.height = rows;
+  const o = off.getContext('2d'); let size = rows * 1.02;
+  o.font = `800 ${size}px Manrope`; const fit = () => o.measureText('Fieldwork').width * 1.6;
+  if (fit() > cols * .82) { size *= cols * .82 / fit(); o.font = `800 ${size}px Manrope`; }
+  const m = o.measureText('Fieldwork'), base = rows * .88, top = base - m.actualBoundingBoxAscent;
+  o.fillStyle = '#fff'; o.save(); o.scale(1.6, 1); o.fillText('Fieldwork', (cols - fit()) / 2 / 1.6, base); o.restore();
+  const a = o.getImageData(0, 0, cols, rows).data, cells = [];
+  for (let y = 0; y < rows; y++) { const fall = clamp((y - top) / Math.max(1, base - top));
+    for (let x = 0; x < cols; x++) { const cov = a[(y * cols + x) * 4 + 3] / 255;
+      if (cov > .3) cells.push({x: x * cw, y: top0 + y * ch, v: (.7 + .3 * cov) * (1 - .35 * fall), h: hash(x, y, 4)}); } }
+  WORD = {cells, ch};
+}
+function drawWord(t) {
+  if (!WORD) sampleWord();
+  W2.clearRect(0, 0, 1920, 1080); W2.font = `600 ${Math.round(WORD.ch * .92)}px "Geist Mono"`; W2.textBaseline = 'top';
+  const scan = ((t - 52.6) * .35) % 1.7 - .3;
+  for (const c of WORD.cells) {
+    const u = c.x / 1920, appear = clamp((t - 52.0 - c.h * .5 - u * .4) / .12);   // characters snap in, scattered
+    if (appear <= 0) continue;
+    const lit = Math.exp(-(((u - scan) / .05) ** 2)) * .4, v = Math.min(1, c.v + lit);
+    const k = Math.min(1, .55 + v * .45 + lit);
+    W2.fillStyle = `rgba(${240 + 15 * k | 0},${80 + 120 * (k - .55) * 2 | 0},${42 + 140 * (k - .55) * 2 | 0},${appear})`;
+    W2.fillText(RAMP[Math.max(1, Math.round(v * 8))], c.x, c.y);
+  }
+}
+
+/* ---------- timeline ---------- */
+function render(t) {
+  const seg = t < 2.5 ? 'words' : t < 6 ? 'tiles' : t < 8 ? 'claim' : t < 28 ? 'chain' : t < 34 ? 'sky' : t < 42 ? 'mont' : t < 48 ? 'dev' : t < 52 ? 'out' : 'end';
+  show('sWords', seg === 'words'); show('sTiles', seg === 'tiles'); show('sClaim', seg === 'claim'); show('sChain', seg === 'chain');
+  show('sSky', seg === 'sky'); show('mont', seg === 'mont'); show('dev', seg === 'dev'); show('sOut', seg === 'out'); show('end', seg === 'end');
+  // background: the hours grid on the brand moments, ink with vermilion light elsewhere
+  if (seg === 'claim' || seg === 'out') drawGrid(t); else drawInk();
+  $('glow').style.opacity = seg === 'claim' || seg === 'out' || seg === 'words' ? 0 : 1;
+  $('bg').style.display = 'block';
+
+  if (seg === 'words') {
+    const w = [...WORDS].reverse().find(x => t >= x[0]) ?? WORDS[0];
+    $('word').textContent = w[1]; $('word').style.color = w[2];
+    slam($('word'), t, w[0], {from: 1.5, dur: .14});
+  }
+  if (seg === 'tiles') {
+    slam($('tilesT'), t, 2.5, {from: 1.2, dur: .2, out: 3.9, outDur: .1});
+    const merge = E.inOut(prog(t, 3.9, 4.15));
+    TILES.forEach((x, i) => {
+      const el = $('tile' + i), at = 2.5 + i * .25, p = E.back(prog(t, at, at + .3));
+      const jit = Math.sin(t * 17 + i * 2) * 6 * (1 - merge);
+      const tx = lerp(x[2], 640, merge), ty = lerp(x[3], 340, merge);
+      el.style.left = tx + jit + 'px'; el.style.top = ty + 'px';
+      el.style.opacity = clamp(prog(t, at, at + .1)) * (1 - prog(t, 4.1, 4.2));
+      el.style.transform = `rotate(${x[4] * (1 - merge)}deg) scale(${lerp(.6, 1, clamp(p)) * lerp(1, .7, merge)})`;
+    });
+    slam($('oneT'), t, 4.05, {from: 1.8, dur: .16, y: -340 * 0});
+    if (t < 4.05) $('oneT').style.opacity = 0;
+    $('oneT').style.top = '400px';
+  }
+  if (seg === 'claim') {
+    $('claimT').innerHTML = 'Approved hours,<br><span style="color:#ffcdbd">billed once.</span>';
+    slam($('claimT'), t, 6.0, {from: 1.25, dur: .2, out: 7.85, outDur: .12});
+  }
+  if (seg === 'chain') renderChain(t);
+  if (seg === 'sky') renderSky(t);
+  if (seg === 'mont') renderMont(t);
+  if (seg === 'dev') renderDev(t);
+  if (seg === 'out') {
+    const words = ['Every', 'approved', 'hour,', 'billed', 'once.'], n = Math.min(words.length, 1 + Math.floor((t - 48) / BEAT));
+    $('outT').innerHTML = words.slice(0, n).map((w, i) => i >= 3 ? `<span style="color:#ffcdbd">${w}</span>` : w).join(' ').replace('hour, ', 'hour,<br>');
+    slam($('outT'), t, 48 + (n - 1) * BEAT, {from: 1.06, dur: .12});
+    $('outT').style.opacity = 1;
+  }
+  if (seg === 'end') {
+    drawWord(t);
+    slam($('endLine'), t, 53.5, {from: 1.1, dur: .3});
+    slam($('cta'), t, 54.5, {from: 1.25, dur: .2});
+    $('cta').style.transform += ' translateX(-50%)';
+  }
+  drawPix(t); shake(t); flash(t);
+}
+
+/* ---------- player (hidden with ?render) ---------- */
+function fit() { const s = Math.min(innerWidth / FILM.width, innerHeight / FILM.height), st = $('stage');
+  st.style.transform = `scale(${s})`; st.style.left = (innerWidth - FILM.width * s) / 2 + 'px'; st.style.top = (innerHeight - FILM.height * s) / 2 + 'px'; }
+const RENDER = new URLSearchParams(location.search).has('render');
+if (RENDER) document.body.classList.add('render');
+addEventListener('resize', fit); fit();
+$('scrub').max = FILM.duration;
+let playing = !RENDER, t0 = performance.now(), cur = 0;
+const audio = RENDER ? null : new Audio('mix.m4a');
+function seek(t) { cur = t; render(t); $('scrub').value = t; $('time').textContent = t.toFixed(2); }
+window.__seek = t => { render(t); return t >= 8 && t < 28 ? recReady().then(() => true) : true; };
+window.__ready = Promise.all([document.fonts.load('800 120px Manrope'), document.fonts.load('600 60px "Geist Mono"'), document.fonts.ready,
+  ...[...document.images].map(i => i.decode().catch(() => {}))]);
+function tick(now) { if (playing) { cur = ((now - t0) / 1000) % FILM.duration; seek(cur); } requestAnimationFrame(tick); }
+$('play').onclick = () => { playing = !playing; $('play').textContent = playing ? 'Pause' : 'Play'; t0 = performance.now() - cur * 1000;
+  if (audio) { if (playing) { audio.currentTime = cur; audio.play().catch(() => {}); } else audio.pause(); } };
+$('scrub').oninput = e => { playing = false; audio?.pause(); $('play').textContent = 'Play'; seek(+e.target.value); };
+addEventListener('keydown', e => { if (e.code === 'Space') { e.preventDefault(); $('play').click(); } });
+window.__ready.then(() => { t0 = performance.now(); if (!RENDER) requestAnimationFrame(tick); else render(0); });
+</script>
+</body>
+</html>

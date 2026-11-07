@@ -127,7 +127,7 @@ export class Delta {
   // A native <dialog> opened with showModal() lives in the browser's top layer, so its backdrop covers the
   // sticky header, the sidebar and the phone tab bar, and focus and Escape are handled by the browser.
   template: `
-    <dialog #el class="modal" [attr.aria-label]="title()" (cancel)="$event.preventDefault(); close.emit()" (click)="$event.target === el && close.emit()">
+    <dialog #el class="modal" [attr.aria-label]="title()" (cancel)="$event.preventDefault(); close.emit()" (click)="$event.target === el ? close.emit() : null">
       <div class="dialog" [class.wide]="wide()">
         <div class="dialog-head">
           <h2>{{ title() }}</h2>

@@ -129,7 +129,7 @@ const ROLE_LABEL: Record<string, string> = { owner: 'Owner', admin: 'Administrat
     <aside [class.open]="menuOpen()" aria-label="Main navigation">
       <div class="ws">
         <button class="ws-btn" type="button" (click)="wsOpen.set(!wsOpen())" [attr.aria-expanded]="wsOpen()" aria-haspopup="menu" [attr.aria-label]="'Workspace ' + session.workspace()?.name" [attr.title]="session.workspace()?.name">
-          <span class="logo"><svg width="100%" height="100%" viewBox="0 0 32 32" aria-hidden="true"><path d="M8 24V14a6 6 0 0 1 6-6h10" stroke="#fff" stroke-width="3.2" fill="none" stroke-linecap="round"/><path d="M14 24v-4a4 4 0 0 1 4-4h6" stroke="#fff" stroke-width="3.2" fill="none" stroke-linecap="round"/><circle cx="22.5" cy="22.5" r="2.6" fill="#f0512a"/></svg></span>
+          <span class="logo"><svg width="100%" height="100%" viewBox="0 0 32 32" aria-hidden="true"><rect x="8" y="4.5" width="5" height="5" rx=".8" fill="#fff"/><rect x="14" y="4.5" width="5" height="5" rx=".8" fill="#fff"/><rect x="20" y="4.5" width="5" height="5" rx=".8" fill="#fff"/><rect x="8" y="10.5" width="5" height="5" rx=".8" fill="#fff"/><rect x="8" y="16.5" width="5" height="5" rx=".8" fill="#fff"/><rect x="8" y="22.5" width="5" height="5" rx=".8" fill="#fff"/><rect x="14" y="16.5" width="5" height="5" rx=".8" fill="#f0512a"/></svg></span>
           <span class="grow lbl" style="min-width: 0">
             <span class="ws-name truncate">{{ session.workspace()?.name }}</span>
             <span class="ws-role">{{ roleLabel() }} · {{ session.workspace()?.currency }}</span>
@@ -187,7 +187,7 @@ const ROLE_LABEL: Record<string, string> = { owner: 'Owner', admin: 'Administrat
     <div class="main">
       <header>
         <button class="m-brand" type="button" (click)="menuOpen.set(true)" aria-label="Open navigation">
-          <span class="logo sm"><svg width="100%" height="100%" viewBox="0 0 32 32" aria-hidden="true"><path d="M8 24V14a6 6 0 0 1 6-6h10" stroke="#fff" stroke-width="3.2" fill="none" stroke-linecap="round"/><path d="M14 24v-4a4 4 0 0 1 4-4h6" stroke="#fff" stroke-width="3.2" fill="none" stroke-linecap="round"/><circle cx="22.5" cy="22.5" r="2.6" fill="#f0512a"/></svg></span>
+          <span class="logo sm"><svg width="100%" height="100%" viewBox="0 0 32 32" aria-hidden="true"><rect x="8" y="4.5" width="5" height="5" rx=".8" fill="#fff"/><rect x="14" y="4.5" width="5" height="5" rx=".8" fill="#fff"/><rect x="20" y="4.5" width="5" height="5" rx=".8" fill="#fff"/><rect x="8" y="10.5" width="5" height="5" rx=".8" fill="#fff"/><rect x="8" y="16.5" width="5" height="5" rx=".8" fill="#fff"/><rect x="8" y="22.5" width="5" height="5" rx=".8" fill="#fff"/><rect x="14" y="16.5" width="5" height="5" rx=".8" fill="#f0512a"/></svg></span>
           <span style="min-width: 0"><b class="truncate">{{ session.workspace()?.name }}</b><span class="cell-sub">{{ roleLabel() }}</span></span>
         </button>
         <span class="crumb" aria-label="Breadcrumb">{{ crumb().group }} <span aria-hidden="true">/</span> <b>{{ crumb().label }}</b></span>

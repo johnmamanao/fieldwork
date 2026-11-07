@@ -72,7 +72,7 @@ import { Scramble } from '../shared/scramble';
   template: `
     <aside class="pix">
       <fw-hours-field [cell]="16" [clearX]="0.3" [clearY]="0.62" [clearW]="0.6" [clearH]="0.24" [sink]="0.12" />
-      <a class="brand" routerLink="/" aria-label="Fieldwork home"><span class="logo"><svg width="100%" height="100%" viewBox="0 0 32 32" aria-hidden="true"><path d="M8 24V14a6 6 0 0 1 6-6h10" stroke="#121214" stroke-width="3.2" fill="none" stroke-linecap="round"/><path d="M14 24v-4a4 4 0 0 1 4-4h6" stroke="#121214" stroke-width="3.2" fill="none" stroke-linecap="round"/><circle cx="22.5" cy="22.5" r="2.6" fill="#f0512a"/></svg></span>Fieldwork</a>
+      <a class="brand" routerLink="/" aria-label="Fieldwork home"><span class="logo"><svg width="100%" height="100%" viewBox="0 0 32 32" aria-hidden="true"><rect x="8" y="4.5" width="5" height="5" rx=".8" fill="#121214"/><rect x="14" y="4.5" width="5" height="5" rx=".8" fill="#121214"/><rect x="20" y="4.5" width="5" height="5" rx=".8" fill="#121214"/><rect x="8" y="10.5" width="5" height="5" rx=".8" fill="#121214"/><rect x="8" y="16.5" width="5" height="5" rx=".8" fill="#121214"/><rect x="8" y="22.5" width="5" height="5" rx=".8" fill="#121214"/><rect x="14" y="16.5" width="5" height="5" rx=".8" fill="#f0512a"/></svg></span>Fieldwork</a>
       <div class="claim">
         <p class="idx"><span>[</span>FW<span>]</span><b fwScramble style="font-weight:inherit">Time to payment</b><span>+</span></p>
         <h2>Approved hours, billed once <span>and closed by a payment.</span></h2>

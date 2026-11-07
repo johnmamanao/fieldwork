@@ -1,0 +1,110 @@
+[
+ {
+  "time": 0.0,
+  "text": "Vermilion hours grid behind the headline",
+  "kind": "dramatised",
+  "source": "Brand motif drawn in the film (same rules as web/src/app/shared/hours-field.ts); not product data"
+ },
+ {
+  "time": 0.0,
+  "text": "HOURS · APPROVALS · INVOICES · PAYMENTS; Four tools. Four truths.",
+  "kind": "copy",
+  "source": "brief.md: the problem Fieldwork replaces (separate time, approval, invoicing and payment tools)"
+ },
+ {
+  "time": 4.0,
+  "text": "One record.",
+  "kind": "copy",
+  "source": "brief.md claim"
+ },
+ {
+  "time": 6.0,
+  "text": "Approved hours, billed once.",
+  "kind": "copy",
+  "source": "Landing page headline; PsaRulesTest test_time_cannot_be_billed_twice"
+ },
+ {
+  "time": 8.3,
+  "text": "HAL-02 · Winter campaign microsite; Running: the timer stays in the top bar",
+  "kind": "measured",
+  "source": "Screen recording media/rec/log (rec.mjs), made in the running app on 2026-11-07 against the demo studio; the demo database was restored afterwards: Leo Martins starts the top-bar timer on HAL-02 from Overview; the pill shows Winter campaign microsite 0:00:0x"
+ },
+ {
+  "time": 11.2,
+  "text": "12 entries submitted · Nov 2 – 8",
+  "kind": "measured",
+  "source": "Screen recording media/rec/submit (rec.mjs), made in the running app on 2026-11-07 against the demo studio; the demo database was restored afterwards: Leo had 12 draft entries for the week of Nov 2–8; Submit week"
+ },
+ {
+  "time": 12.4,
+  "text": "26 entries · 65:30 h waiting; Approved · 26 entries in one click",
+  "kind": "measured",
+  "source": "Screen recording media/rec/approve (rec.mjs), made in the running app on 2026-11-07 against the demo studio; the demo database was restored afterwards: Avery Brooks filters to Leo Martins, 26 selected · 65:30, Approve; toast 'Approved 26 entries'"
+ },
+ {
+  "time": 17.9,
+  "text": "9 approved entries · 13.5 h; $2,025.00 one line on one invoice; LK-0029 issued · Halden Outdoor Co.",
+  "kind": "measured",
+  "source": "Screen recording media/rec/invoice (rec.mjs), made in the running app on 2026-11-07 against the demo studio; the demo database was restored afterwards: New invoice for Halden Outdoor Co. / HAL-02, Add 9 entries (13.5 h × $150), total $2,025.00, Issue invoice → LK-0029"
+ },
+ {
+  "time": 20.5,
+  "text": "Invoiced · Leo's rows, locked to LK-0029; Billed once. Never twice.",
+  "kind": "measured",
+  "source": "Screen recording media/rec/lock (rec.mjs), made in the running app on 2026-11-07 against the demo studio; the demo database was restored afterwards: Leo's timesheet shows the Invoiced lock on his Winter campaign rows; PsaRulesTest test_time_cannot_be_billed_twice"
+ },
+ {
+  "time": 24.9,
+  "text": "$2,025.00 bank transfer, settled; $0.00 LK-0029 · amount due; A settled payment closes an invoice.",
+  "kind": "measured",
+  "source": "Screen recording media/rec/pay (rec.mjs), made in the running app on 2026-11-07 against the demo studio; the demo database was restored afterwards: Record payment (bank transfer, settled, $2,025.00 prefilled for LK-0029); LK-0029 then shows Paid, amount due $0.00"
+ },
+ {
+  "time": 28.25,
+  "text": "The skyline rising",
+  "kind": "measured",
+  "source": "66 real frames of the app's skyline animation (media/sky), captured with a stepped clock by capture-skyline.mjs"
+ },
+ {
+  "time": 29.0,
+  "text": "Every hour, on the record.",
+  "kind": "copy",
+  "source": "brief.md"
+ },
+ {
+  "time": 31.6,
+  "text": "5,966 h billable, last 26 weeks · 59 h busiest day, Jun 1 · 45 days longest workday streak",
+  "kind": "measured",
+  "source": "Skyline panel stats, /api/analytics/daily, 2026-11-07 (capture 09-skyline.png)"
+ },
+ {
+  "time": 36.0,
+  "text": "Tour: Projects, Clients, Staff, Reports, Analytics, Overview, each with a caption of what that screen shows",
+  "kind": "measured",
+  "source": "Real screens of the demo studio (web/public/landing/*.webp)"
+ },
+ {
+  "time": 46.0,
+  "text": "Built for desktop and phone.",
+  "kind": "copy",
+  "source": "Real desktop (tour-overview.webp) and phone (phone.webp) captures of the same app"
+ },
+ {
+  "time": 52.0,
+  "text": "Every approved hour, billed once.",
+  "kind": "copy",
+  "source": "Landing page headline"
+ },
+ {
+  "time": 56.0,
+  "text": "ASCII 'Fieldwork' wordmark",
+  "kind": "dramatised",
+  "source": "Brand mark drawn in the film"
+ },
+ {
+  "time": 57.5,
+  "text": "Time, invoices and payments for studios · Open the demo studio",
+  "kind": "copy",
+  "source": "Landing and sign-in copy"
+ }
+]
