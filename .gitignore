@@ -5,3 +5,6 @@ web/dist/
 web/.angular/
 api/vendor/
 api/storage/*.key
+
+# local animation experiments (Hairline skill), not part of Fieldwork
+hairline/
