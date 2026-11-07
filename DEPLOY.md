@@ -28,13 +28,13 @@ Free-tier limits change; check each provider's current terms when you sign up.
 
 1. Sign up at neon.tech and create a project named `fieldwork` in the region closest to you.
 2. Copy the connection string (it looks like `postgresql://USER:PASSWORD@ep-....neon.tech/neondb?sslmode=require`).
-3. Load the schema and the demo studio from your computer, using the Docker stack you already run (it takes a few minutes over the network):
+3. Load the demo studio with `deploy\load-demo.ps1` (after step 3 below has connected the database and `deploy\setup-vercel.ps1` has run). It builds the studio in a temporary database in your local Docker stack, then copies it to Neon in one transfer, in about a minute. Seeding straight into Neon from your computer is far slower, because every query crosses the network.
 
 ```bash
-docker compose exec -e DB_URL="postgresql://USER:PASSWORD@HOST/neondb?sslmode=require" -e DB_SSLMODE=require api php artisan migrate:fresh --seed --force
+powershell -ExecutionPolicy Bypass -File deploy\load-demo.ps1
 ```
 
-Run the same command again whenever you want to reset the public demo to its original state.
+Run it again whenever you want to reset the public demo to its original state.
 
 ## 2. Create the file bucket (Cloudflare R2)
 
@@ -95,6 +95,6 @@ Emails (invitations, password resets, invoices) are written to the API's logs by
 
 ## Things to know
 
-- The demo is public and shared: visitors' changes are visible to everyone until you reset it (step 1, last command).
+- The demo is public and shared: visitors' changes are visible to everyone until you reset it with `deploy\load-demo.ps1`.
 - Function requests time out after 30 seconds (`maxDuration` in `api/vercel.json`), and request bodies are limited to about 4.5 MB, which caps upload size.
 - Docker stays the way to develop locally; nothing in the Vercel setup changes it.
