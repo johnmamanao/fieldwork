@@ -35,7 +35,8 @@ const ROLES = [
     .wrap { width: min(1280px, 100% - 2 * clamp(0px, 5.5vw - 20px, 80px)); margin-inline: auto; padding-inline: clamp(16px, 3vw, 40px); position: relative; }
     .railed { border-inline: 1px solid var(--rail); }
     .dark .railed, .railed.d { border-color: var(--rail-d); }
-    section[id] { scroll-margin-top: var(--space-9); }
+    section[id], #roles { scroll-margin-top: var(--space-9); }
+    section[id][tabindex="-1"]:focus, #roles[tabindex="-1"]:focus { outline: none; }
     .dark { background: var(--ink); color: #eeeef0; position: relative; isolation: isolate; }
     .dark > fw-dither { z-index: -1; }
 
@@ -304,7 +305,7 @@ const ROLES = [
     @keyframes card-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
     @media (prefers-reduced-motion: reduce) { .in, .sees div { animation: none; } .ticks .more { transition: none; } }
   `],
-  host: { '(window:scroll)': 'onScroll()', '(window:resize)': 'onScroll()' },
+  host: { '(window:scroll)': 'onScroll()', '(window:resize)': 'onScroll()', '(click)': 'onAnchor($event)' },
   template: `
     <header class="nav">
       <div class="bar">
@@ -631,5 +632,23 @@ export class LandingPage {
 
   top(): void {
     scrollTo({ top: 0, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+  }
+
+  /**
+   * In-page links (#how, #analytics, the footer index) scroll to their section here. Left to the browser, the hash
+   * change becomes a router navigation, and the router's scroll-to-top then undoes the jump.
+   */
+  onAnchor(e: MouseEvent): void {
+    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    const link = (e.target as HTMLElement | null)?.closest<HTMLAnchorElement>('a[href^="#"]');
+    const id = link?.getAttribute('href')?.slice(1);
+    const target = id ? document.getElementById(id) : null;
+    if (!target) return;
+    e.preventDefault();
+    target.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+    history.replaceState(history.state, '', `#${id}`);
+    // Keyboard and screen-reader users continue from the section they jumped to.
+    if (!target.hasAttribute('tabindex')) target.setAttribute('tabindex', '-1');
+    target.focus({ preventScroll: true });
   }
 }

@@ -1,4 +1,5 @@
-import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
+import { ApplicationConfig, inject, provideAppInitializer, provideBrowserGlobalErrorListeners } from '@angular/core';
+import { ViewportScroller } from '@angular/common';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { TitleStrategy, provideRouter, withComponentInputBinding, withInMemoryScrolling, withViewTransitions } from '@angular/router';
 import { PageMeta } from './core/page-meta';
@@ -26,9 +27,11 @@ function guardTransition({ transition }: { transition: { skipTransition(): void;
 
 export const appConfig: ApplicationConfig = {
   providers: [
+    // Links to a section (/#analytics) land below the landing page's fixed 80px navigation bar.
+    provideAppInitializer(() => inject(ViewportScroller).setOffset([0, 80])),
     provideBrowserGlobalErrorListeners(),
     provideHttpClient(withInterceptors([apiInterceptor])),
     { provide: TitleStrategy, useClass: PageMeta },
-    provideRouter(routes, withComponentInputBinding(), withInMemoryScrolling({ scrollPositionRestoration: 'top' }), withViewTransitions({ skipInitialTransition: true, onViewTransitionCreated: guardTransition })),
+    provideRouter(routes, withComponentInputBinding(), withInMemoryScrolling({ scrollPositionRestoration: 'top', anchorScrolling: 'enabled' }), withViewTransitions({ skipInitialTransition: true, onViewTransitionCreated: guardTransition })),
   ],
 };
