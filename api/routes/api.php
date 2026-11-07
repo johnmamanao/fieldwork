@@ -36,7 +36,10 @@ Route::get('demo-accounts', function () {
 
     return \App\Models\WorkspaceMembership::query()->with(['user:id,name,email', 'workspace:id,name'])
         ->whereHas('user', fn ($q) => $q->whereIn('email', ['owner@larkspur.test', 'admin@larkspur.test', 'pm@larkspur.test', 'finance@larkspur.test', 'staff@larkspur.test', 'viewer@larkspur.test', 'owner@copperline.test']))
-        ->where('status', 'active')->get()
+        ->where('status', 'active')
+        // Each person's first workspace wins (Avery is Larkspur's owner and also a Copperline admin); without an
+        // explicit order the database may return either membership first.
+        ->orderBy('workspace_id')->orderBy('id')->get()
         ->unique('user_id')
         ->map(fn ($m) => ['email' => $m->user->email, 'name' => $m->user->name, 'role' => $roles[$m->role] ?? $m->role, 'workspace' => $m->workspace->name, 'password' => \Database\Seeders\DemoSeeder::PASSWORD])
         ->values();
