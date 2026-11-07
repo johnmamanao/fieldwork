@@ -91,6 +91,18 @@ If Vercel gave the project a different address (the name was taken), use that ad
 3. Deploy, then open the site, choose **Explore the demo**, and pick a person.
 4. Put the site's address into the API project's `FRONTEND_URL` if it differs, and redeploy the API.
 
+## Daily demo reset (automatic)
+
+`.github/workflows/reset-demo.yml` rebuilds the demo studio every day at 04:00 UTC on a GitHub Actions runner and copies it to Neon in one transaction, so visitors' changes never pile up and the demo's dates stay current. If a run fails, the live demo keeps its current data.
+
+Set it up once (it stores Neon's connection string as the repository secret `NEON_DATABASE_URL` without printing it, then starts a first run):
+
+```bash
+powershell -ExecutionPolicy Bypass -File deploy\setup-auto-reset.ps1
+```
+
+To reset on demand, open the repository's **Actions** tab, choose **Reset live demo**, and click **Run workflow**. GitHub pauses scheduled workflows in a repository with no activity for 60 days; a push or a manual run turns them back on.
+
 ## Optional: send real email
 
 Emails (invitations, password resets, invoices) are written to the API's logs by default, so a public demo cannot be used to email strangers. To send them, add an SMTP provider's settings to the API project: `MAIL_MAILER=smtp`, `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_FROM_ADDRESS`.
