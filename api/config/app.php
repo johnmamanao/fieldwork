@@ -14,6 +14,17 @@ return [
     */
 
     'name' => env('APP_NAME', 'Laravel'),
+
+    /*
+    | Demo mode: the sign-in picker for the seeded accounts, and the shared demo password cannot be changed.
+    | Always on in local; turn it on for a public demo deployment with DEMO_MODE=true.
+    */
+
+    'demo' => (bool) env('DEMO_MODE', false),
+
+    /* Vercel Cron sends "Authorization: Bearer <CRON_SECRET>" to the scheduled-task route. */
+
+    'cron_secret' => env('CRON_SECRET'),
     'frontend_url' => env('FRONTEND_URL', 'http://localhost:8080'),
 
     /*

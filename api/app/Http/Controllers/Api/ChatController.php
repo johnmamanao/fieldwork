@@ -101,7 +101,7 @@ class ChatController extends Controller
         $attrs = ['conversation_id' => $conversation->id, 'user_id' => $this->ctx()->user->id, 'body' => $data['body'] ?? '', 'client_uuid' => $data['client_uuid']];
         if ($request->hasFile('file')) {
             $attrs['attachment_name'] = $request->file('file')->getClientOriginalName();
-            $attrs['attachment_path'] = $request->file('file')->store("workspaces/{$this->ctx()->workspace->id}/chat/{$conversation->id}", 'local');
+            $attrs['attachment_path'] = $request->file('file')->store("workspaces/{$this->ctx()->workspace->id}/chat/{$conversation->id}", config('filesystems.uploads'));
         }
         $message = Message::create($attrs);
         ConversationMember::updateOrCreate(['conversation_id' => $conversation->id, 'user_id' => $this->ctx()->user->id], ['last_read_message_id' => $message->id]);
@@ -138,7 +138,7 @@ class ChatController extends Controller
         $isModerator = $conversation->type === 'project' && $this->ctx()->canManageProject($conversation->project);
         abort_unless($message->user_id === $this->ctx()->user->id || $isModerator, 403);
         if ($message->attachment_path) {
-            Storage::disk('local')->delete($message->attachment_path);
+            Storage::disk(config('filesystems.uploads'))->delete($message->attachment_path);
         }
         $message->update(['deleted_at' => now(), 'body' => '', 'attachment_path' => null, 'attachment_name' => null]);
 
@@ -150,7 +150,7 @@ class ChatController extends Controller
         $this->assertAccess($message->conversation);
         abort_unless($message->attachment_path && ! $message->deleted_at, 404);
 
-        return Storage::disk('local')->download($message->attachment_path, $message->attachment_name);
+        return Storage::disk(config('filesystems.uploads'))->download($message->attachment_path, $message->attachment_name);
     }
 
     public function search(Request $request)

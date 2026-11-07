@@ -72,7 +72,7 @@ class GenerateReportExport implements ShouldQueue
             }
             rewind($fh);
             $path = "workspaces/{$ws->id}/exports/{$export->id}-{$export->report}.csv";
-            Storage::disk('local')->put($path, stream_get_contents($fh));
+            Storage::disk(config('filesystems.uploads'))->put($path, stream_get_contents($fh));
             fclose($fh);
 
             $export->update(['status' => 'ready', 'path' => $path, 'row_count' => count($report['rows']), 'expires_at' => now()->addDay()]);

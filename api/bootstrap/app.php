@@ -17,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias(['workspace' => ResolveWorkspace::class]);
         // Resolve the workspace before route-model binding so bound models are workspace-scoped.
         $middleware->prependToPriorityList(SubstituteBindings::class, ResolveWorkspace::class);
+        $middleware->trustProxies(at: '*');
         $middleware->throttleApi('240,1');
     })
     ->withExceptions(function (Exceptions $exceptions): void {

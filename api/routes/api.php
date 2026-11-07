@@ -29,9 +29,9 @@ Route::get('invitations/{token}', [MemberController::class, 'showInvitation']);
 Route::post('invitations/{token}/accept', [MemberController::class, 'acceptInvitation'])->middleware('throttle:10,1');
 Route::post('webhooks/payments/{workspace}', [WebhookController::class, 'payment']);
 
-// Local demo only: the seeded accounts for the sign-in screen's quick picker.
+// Local or demo mode only: the seeded accounts for the sign-in screen's quick picker.
 Route::get('demo-accounts', function () {
-    abort_unless(app()->environment('local'), 404);
+    abort_unless(app()->environment('local') || config('app.demo'), 404);
     $roles = ['owner' => 'Owner', 'admin' => 'Administrator', 'project_manager' => 'Project manager', 'finance' => 'Finance', 'staff' => 'Staff member', 'viewer' => 'Viewer'];
 
     return \App\Models\WorkspaceMembership::query()->with(['user:id,name,email', 'workspace:id,name'])
@@ -193,4 +193,15 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('notification-preferences', [NotificationController::class, 'savePreferences']);
         Route::get('audit', AuditController::class);
     });
+});
+
+// Scheduled tasks for serverless hosts (Vercel Cron), which call this URL instead of running `schedule:run`.
+// The commands are called directly because the cron may fire at any minute in its window.
+Route::get('cron/run', function (\Illuminate\Http\Request $request) {
+    $secret = config('app.cron_secret');
+    abort_unless($secret && hash_equals('Bearer '.$secret, (string) $request->header('Authorization')), 401);
+    \Illuminate\Support\Facades\Artisan::call('app:milestone-reminders');
+    \Illuminate\Support\Facades\Artisan::call('app:prune-exports');
+
+    return response()->json(['ran' => ['app:milestone-reminders', 'app:prune-exports']]);
 });

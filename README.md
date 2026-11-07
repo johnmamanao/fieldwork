@@ -2,7 +2,7 @@
 
 Fieldwork connects client projects, delivery, staff capacity, time tracking, invoicing, payments and analytics for a services studio. Operational records drive every dashboard figure, and each figure links back to the records behind it.
 
-It is built from `psa-complete-modules.md`. The design direction is described in [DESIGN.md](DESIGN.md).
+It is built from `psa-complete-modules.md`. The design direction is described in [DESIGN.md](DESIGN.md). To put it online for free on Vercel, follow [DEPLOY.md](DEPLOY.md).
 
 ## Tech stack
 

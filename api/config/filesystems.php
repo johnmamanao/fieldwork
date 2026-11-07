@@ -16,6 +16,13 @@ return [
     'default' => env('FILESYSTEM_DISK', 'local'),
 
     /*
+    | The disk for files people upload (project files, chat attachments) and report exports. Local disk under
+    | Docker; an S3-compatible bucket (Cloudflare R2) on serverless hosts, whose filesystem does not persist.
+    */
+
+    'uploads' => env('UPLOADS_DISK', 'local'),
+
+    /*
     |--------------------------------------------------------------------------
     | Filesystem Disks
     |--------------------------------------------------------------------------

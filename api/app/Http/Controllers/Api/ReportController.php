@@ -79,7 +79,7 @@ class ReportController extends Controller
         abort_unless((new ReportService($this->ctx()))->allowed($export->report), 403, 'You no longer have access to this report.');
         abort_unless($export->status === 'ready' && $export->expires_at?->isFuture(), 410, 'This export has expired. Generate a new one.');
 
-        return Storage::disk('local')->download($export->path, "fieldwork-{$export->report}-".now()->format('Ymd').'.csv', ['Content-Type' => 'text/csv']);
+        return Storage::disk(config('filesystems.uploads'))->download($export->path, "fieldwork-{$export->report}-".now()->format('Ymd').'.csv', ['Content-Type' => 'text/csv']);
     }
 
     public function saved()

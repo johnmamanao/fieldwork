@@ -56,7 +56,7 @@ Artisan::command('app:milestone-reminders', function () {
 
 Artisan::command('app:prune-exports', function () {
     ReportExport::query()->where('expires_at', '<', now())->whereNotNull('path')->get()->each(function ($e) {
-        Storage::disk('local')->delete($e->path);
+        Storage::disk(config('filesystems.uploads'))->delete($e->path);
         $e->update(['path' => null, 'status' => 'failed', 'error' => 'Expired']);
     });
 })->purpose('Delete expired report exports');

@@ -255,7 +255,7 @@ class ProjectController extends Controller
         $this->assertVisible($project);
         abort_unless($this->ctx()->can('projects.manage') || $project->members()->where('user_id', $this->ctx()->user->id)->exists(), 403);
         $file = $request->validate(['file' => 'required|file|max:20480'])['file'];
-        $path = $file->store("workspaces/{$this->ctx()->workspace->id}/projects/{$project->id}", 'local');
+        $path = $file->store("workspaces/{$this->ctx()->workspace->id}/projects/{$project->id}", config('filesystems.uploads'));
         $record = ProjectFile::create([
             'project_id' => $project->id,
             'uploaded_by' => $this->ctx()->user->id,
@@ -275,7 +275,7 @@ class ProjectController extends Controller
         $this->assertVisible($project);
         abort_unless($file->project_id === $project->id, 404);
 
-        return Storage::disk('local')->download($file->path, $file->name);
+        return Storage::disk(config('filesystems.uploads'))->download($file->path, $file->name);
     }
 
     public function deleteFile(Project $project, ProjectFile $file)
@@ -283,7 +283,7 @@ class ProjectController extends Controller
         $this->assertVisible($project);
         abort_unless($file->project_id === $project->id, 404);
         abort_unless($this->ctx()->canManageProject($project) || $file->uploaded_by === $this->ctx()->user->id, 403);
-        Storage::disk('local')->delete($file->path);
+        Storage::disk(config('filesystems.uploads'))->delete($file->path);
         $file->delete();
         Audit::activity($project->id, 'file.deleted', "Deleted {$file->name}", null);
 

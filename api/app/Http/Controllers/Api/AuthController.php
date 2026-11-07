@@ -70,7 +70,7 @@ class AuthController extends Controller
             'password' => ['required', 'different:current_password', PasswordRule::min(10)],
         ]);
         $user = $request->user();
-        if (str_ends_with($user->email, '.test') && app()->environment('local')) {
+        if (str_ends_with($user->email, '.test') && (app()->environment('local') || config('app.demo'))) {
             throw ValidationException::withMessages(['password' => 'Demo accounts share one password, so it cannot be changed here. Create your own workspace to try this.']);
         }
         if (! Hash::check($data['current_password'], $user->password)) {

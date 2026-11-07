@@ -1,0 +1,9 @@
+# Vercel installs Composer packages itself (without dev packages); never upload the local ones or local state.
+vendor
+storage/app
+storage/framework
+storage/logs
+bootstrap/cache/*.php
+tests
+.env
+.phpunit.result.cache
